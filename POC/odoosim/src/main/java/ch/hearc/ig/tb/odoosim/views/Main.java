@@ -1,35 +1,77 @@
 package ch.hearc.ig.tb.odoosim.views;
 
-//import ch.hearc.ig.tb.odoosim.business.*;
 import ch.hearc.ig.tb.odoosim.businesstwo.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import static java.util.Arrays.asList;
-import java.util.Collection;
 import java.util.Collections;
 import static java.util.Collections.emptyMap;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class Main {
-
-    private static XmlRpcClientConfigImpl configuration;
-    private static XmlRpcClient client;
+    
+    private final static Random RDM = new Random();
     private static String database = "edu-hegarc-odoosim";
     private static String username = "anthony.tomat@he-arc.ch";
     private static String password = "blabla14";
-    private static int dbconfigured;
-    private static Scanner s = new Scanner(System.in);
+    private final static Scanner SCR = new Scanner(System.in);
     private static int uid = 1;
+    private static int day;
 
     public static void main(String[] args) {
-        displayMenu("");
+        //char yet;
+        //do {
+            switch(getMenu()) {
+                case "1":
+                    connection(database, username, password);
+                    break;
+                case "2":
+                    getProducts();
+                    break;
+                case "3":
+                    simulateMarket();
+                    main(null);
+                    break;
+                case "4":
+                    System.out.println(randomPrice());
+                    main(null);
+                case "5":
+                    System.out.println(randomQuantity(1));
+                    main(null);
+                case "6":
+                    simulateTimer();
+                    break;
+                case "X":
+                    break;
+            }
+            //}
+            //System.out.println("Voulez-vous continuer (O|N)");
+            //yet = s.nextLine().charAt(0);
+        //} while (yet == 'O');
+    }
+    
+    public static String getMenu() {
+        
+        System.out.println("\n\rMenu principal du simulateur");
+        System.out.println("Veuillez choisir l\'action souhaitée :");
+        
+        System.out.println("[1] Tester la connexion à une base de données Odoo en mode Saas");
+        System.out.println("[2] Lister les produits de la base de données Odoo");
+        System.out.println("[3] Simuler un marché");
+        System.out.println("[4] Tester la génération de prix");
+        System.out.println("[5] Tester la génération de quantité");
+        System.out.println("[6] Simuler le temps qui passe (toute les 30 secondes)");
+        System.out.println("[X] Mettre fin au simulateur");
+        
+        Scanner sc = new Scanner(System.in);
+        char c = sc.nextLine().charAt(0);
+        return String.valueOf(c).toUpperCase();
     }
 
     private static void connection(String database, String username, String password) {
@@ -46,53 +88,10 @@ public class Main {
             client.setConfig(clientConfiguration);
             uid = (int) client.execute(clientConfiguration, "authenticate", asList(database, username, password, emptyMap()));
             System.out.println("Effectué avec succès avec l'identifiant N° " + uid + " référencé");
-            displayMenu("");
         } catch (Exception e) {
-            displayMenu("Erreur : " + e.getMessage());
-        }
-    }
-
-    private static void displayMenu(String message) {
-
-        try {
-            s.reset();
-            if (message != "") {
-                System.out.println("Message : " + message);
-            }
-            System.out.println("Bienvenue sur le simulateur OdooSIM");
-            System.out.println("Que voulez-vous faire?");
-            System.out.println("[1] Tester la connexion à une base de données Odoo en mode Saas");
-            System.out.println("[2] Lister les produits de la base de données Odoo");
-            System.out.println("[3] Exécuter le simulateur et visualiser les opérations");
-            System.out.println("[4] Générer un prix aléatoire");
-            System.out.println("[X] Terminer le programme");
-
-            System.out.println("Entrer l'option désirée : ");
-
-            switch (s.nextLine()) {
-
-                case "1":
-                    //paramDB();
-                    connection(database, username, password);
-                    break;
-                case "2":
-                    //  Récupération des produits
-                    getProducts();
-                    break;
-                case "3":
-                    //  Simulation du marché achat-vente
-                    simulateMarket();
-                    break;
-                case "4":
-                    randomQuantity(1);
-                case "X":
-                    System.out.println("Aurevoir !");
-                    break;
-                default:
-                    displayMenu("Fonctionnalité non conforme ! Veuillez choisir une option valide. Merci");
-            }
-        } catch (Exception e) {
-            displayMenu("Erreur : " + e.getMessage());
+            System.out.println("Erreur : " + e.getMessage());
+        } finally {
+            main(null);
         }
     }
 
@@ -112,39 +111,31 @@ public class Main {
         asList("customer", "=", true)))));
             System.out.println(String.valueOf(o));
         } catch (Exception e) {
-            displayMenu("Erreur : " + e.getMessage());
+            System.out.println("Erreur"+e.getMessage());
         }
-    }
-
-    private static void paramDB() {
-        System.out.println("Veuillez entrer la base de données : ");
-        database = s.nextLine();
-        System.out.println("Veuillez entrer le nom d'utilisateur : ");
-        username = s.nextLine();
-        System.out.println("Veuillez entrer le mot de passe : ");
-        password = s.nextLine();
+        finally {
+            main(null);
+        }
     }
     
     private static Double randomPrice() {
         Double minBound = 25.00;
         Double maxBound = 50.55;
-        Random r = new Random();
-        Double price = minBound + (maxBound - minBound) * r.nextDouble();
+        Double price = (minBound + (maxBound - minBound)) * RDM.nextDouble();
         return price;
     }
     
     private static int randomQuantity(int type) {
-        int maxBound = 0;
+        int maxBound;
         if(type<1)
             maxBound = 70;
         else
             maxBound = 20;
-        Random r = new Random();
-        return r.nextInt(maxBound);
+        return RDM.nextInt(maxBound);
     }
     
     private static void simulateMarket(){
-        
+        try {
         //  Création des éléments
         ArrayList<Good> goods = new ArrayList<>();
         ArrayList<Region> regions = new ArrayList<>();
@@ -265,7 +256,37 @@ public class Main {
                 
             }               
         }
-        displayMenu("Fin de la simulation du marché");
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        } finally {
+            //main(null);
+        }
     }
-
+    
+    private static void simulateTimer() {
+        try {
+        day = 0;
+        Timer t = new Timer();
+        MyTimerTask mTTask = new MyTimerTask();
+        //  J'ai encore un soucis ici, je n'arrive pas à faire remplir cette condition
+        //  de 31 fois... Et quand j'essaie avec le debug, il plante (sans doute à cause
+        //  que le timer crée un thread... à voir
+        do {
+            t.schedule(mTTask,0,10000);
+        } while (day<31);
+        t.cancel();
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
+        } finally { main(null); }
+        
+    }
+    
+    public static class MyTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            day++;
+            System.out.println("\n\rJour numéro : " + day);
+            simulateMarket();
+        }
+    }
 }
