@@ -1,13 +1,18 @@
 package ch.hearc.ig.tb.odoosim.views;
 
-import ch.hearc.ig.tb.odoosim.business.*;
+//import ch.hearc.ig.tb.odoosim.business.*;
+import ch.hearc.ig.tb.odoosim.businesstwo.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import static java.util.Arrays.asList;
+import java.util.Collection;
+import java.util.Collections;
 import static java.util.Collections.emptyMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -59,6 +64,7 @@ public class Main {
             System.out.println("[1] Tester la connexion à une base de données Odoo en mode Saas");
             System.out.println("[2] Lister les produits de la base de données Odoo");
             System.out.println("[3] Exécuter le simulateur et visualiser les opérations");
+            System.out.println("[4] Générer un prix aléatoire");
             System.out.println("[X] Terminer le programme");
 
             System.out.println("Entrer l'option désirée : ");
@@ -70,12 +76,15 @@ public class Main {
                     connection(database, username, password);
                     break;
                 case "2":
-                    //paramDB();
+                    //  Récupération des produits
                     getProducts();
                     break;
                 case "3":
-                    startSimulation();
+                    //  Simulation du marché achat-vente
+                    simulateMarket();
                     break;
+                case "4":
+                    randomQuantity(1);
                 case "X":
                     System.out.println("Aurevoir !");
                     break;
@@ -89,7 +98,7 @@ public class Main {
 
     private static void getProducts() {
         try {
-
+            
             String dns = "odoo.com";
             String URL = "https://" + database + "." + dns;
             Object[] params = new Object[]{database, username, password};
@@ -115,54 +124,148 @@ public class Main {
         System.out.println("Veuillez entrer le mot de passe : ");
         password = s.nextLine();
     }
-
-    private static void startSimulation() {
-        throw new UnsupportedOperationException("Cette fonctionnalité n'est pas encore disponible");
-//        System.out.println("Créer les demandeurs");
-//        ArrayList customers = new ArrayList();
-//
-//        for (int i = 0; i < 20; i++) {
-//            customers.add(new Person());
-//        }
-//
-//        for (int i = 0; i < 30; i++) {
-//            customers.add(new Compagny());
-//        }
-//
-//        System.out.println("Créer les offreurs");
-//
-//        Manufacturer m1 = new Manufacturer(0, "A");
-//        Manufacturer m2 = new Manufacturer(1, "B");
-//        Manufacturer m3 = new Manufacturer(2, "C");
-//
-//        System.out.println("Créer les produits de l'offre 1");
-//        Product p1 = new Product(0, "Lait", 1.20, m1);
-//        m1.addProduct(p1);
-//
-//        Product p2 = new Product(0, "Crème", 3.30, m1);
-//        m1.addProduct(p2);
-//
-//        Product p3 = new Product(0, "Fromage", 2.10, m1);
-//        m1.addProduct(p3);
-//
-//        Product p4 = new Product(0, "Bière", 3.80, m1);
-//        m1.addProduct(p4);
-//
-//        System.out.println("Créer les produits de l'offre 2");
-//        Product p5 = new Product(0, "Lait", 1.10, m2);
-//        m2.addProduct(p5);
-//
-//        Product p6 = new Product(0, "Crème", 3.75, m2);
-//        m2.addProduct(p6);
-//
-//        System.out.println("Créer les produits de l'offre 3");
-//        Product p7 = new Product(0, "Fromage", 2.90, m3);
-//        m3.addProduct(p7);
-//
-//        Product p8 = new Product(0, "Bière", 4.05, m3);
-//        m3.addProduct(p8);
-//
-//        System.out.println("FIN CONFIGURATION");
+    
+    private static Double randomPrice() {
+        Double minBound = 25.00;
+        Double maxBound = 50.55;
+        Random r = new Random();
+        Double price = minBound + (maxBound - minBound) * r.nextDouble();
+        return price;
+    }
+    
+    private static int randomQuantity(int type) {
+        int maxBound = 0;
+        if(type<1)
+            maxBound = 70;
+        else
+            maxBound = 20;
+        Random r = new Random();
+        return r.nextInt(maxBound);
+    }
+    
+    private static void simulateMarket(){
+        
+        //  Création des éléments
+        ArrayList<Good> goods = new ArrayList<>();
+        ArrayList<Region> regions = new ArrayList<>();
+        ArrayList<Vendor> vendors = new ArrayList();
+        ArrayList<Consumer> consumers = new ArrayList<>();
+        ArrayList<Market> markets = new ArrayList<>();
+        ArrayList<Channel> channels = new ArrayList();
+        
+        //  Création d'un produit
+        goods.add(new Material(0, "Lait"));
+        
+        //  Création des canaux de distribution
+        channels.add(new Ecommerce("DC00", 10));
+        channels.add(new Grocery("DC01", 15));
+        channels.add(new Hypermarket("DC02", 30));
+        
+        //  Création de la région
+        Region region = new Region("West");
+        
+        //  Création du marché -> Un marché est une place d'échange (vente-achat)
+        //  pour 3 éléments distincts : Un produit, un canal de distribution et une région
+        Market m1 = new Market("Lait-West-DC00", goods.get(0), channels.get(0), region);
+        
+        //  L'idée c'est de mettre en place un timer pour itérer toutes les
+        //  60 secondes et recréer les demandes pour chaque consommateur.
+        //  CI-DESSOUS -> STATIQUE!!        
+        Consumer c = new Consumer(0, "John Q. Bishop", region);
+        c.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c);
+        Consumer c1 = new Consumer(0, "Anthony Tomat", region);
+        c1.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c1);
+        Consumer c2 = new Consumer(0, "Boris Fritscher", region);
+        c2.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c2);
+        Consumer c3 = new Consumer(0, "Cédric Gaspoz", region);
+        c3.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c3);
+        Consumer c4 = new Consumer(0, "Alessio Do Santos", region);
+        c4.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c4);
+        Consumer c5 = new Consumer(0, "Cédric Baudet", region);
+        c5.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c5);
+        Consumer c6 = new Consumer(0, "Francesco Termine", region);
+        c6.addNeed(new Need(goods.get(0), randomQuantity(1)),m1);
+        consumers.add(c6);
+        
+        //  Toutes les 60 secondes, récupérer les stocks régionaux de toutes les
+        //  sociétés (les équipes) dans la base de données Odoo via l'API        
+        Vendor v = new Vendor(0, "Dairy Corp. & Co.", region);
+        v.addOffer(new Offer(goods.get(0), randomQuantity(0), randomPrice()),m1);
+        Vendor v1 = new Vendor(1, "Michel et Coco", region);
+        v1.addOffer(new Offer(goods.get(0), randomQuantity(0), randomPrice()),m1);
+        Vendor v2 = new Vendor(0, "MicroMilk", region);
+        v2.addOffer(new Offer(goods.get(0), randomQuantity(0), randomPrice()),m1);
+        vendors.add(v2);
+        vendors.add(v1);
+        vendors.add(v);
+        
+        //  Algorithme du choix de la meilleure offre pour chaque client avec 
+        //  comme critère, le prix et la quantité.
+        
+        //  On trie l'offre d'un certain marché par prix du plus bas au plus haut
+        Collections.sort(m1.getAllOffers());
+        
+        //  On crée les itérateurs pour les différents éléments
+        Iterator<Consumer> iConsumers = consumers.listIterator();
+        Iterator<Vendor> iVendors = vendors.listIterator();
+        Iterator<Need> iNeeds;    
+        Iterator<Offer> iOffers;
+        Consumer con;
+        Need nee;
+        Offer off;
+        
+        //  Récapitulatif des données du marché
+        System.out.println("Taille du marché en demande : "+m1.getAllNeeds().size());
+        System.out.println("Taille du marché en offre : "+m1.getAllOffers().size());
+        
+        //  On boucle sur tous les consommateurs
+        while (iConsumers.hasNext()) {
+            //  Récupération des besoins du client en cours
+            con = iConsumers.next();
+            iNeeds = con.getNeeds().listIterator();
+            
+            //  Parcours des besoins pour un client
+            while(iNeeds.hasNext()) {
+                nee = iNeeds.next();
+                iOffers = m1.getAllOffers().listIterator();
+                
+                //  Parcours de l'offre et choix
+                while(iOffers.hasNext()) {
+                    off = iOffers.next();
+                    
+                    //  Si la quantité de l'offre peut assouvir le besoin, on la prend
+                    if(off.getQuantity()>=nee.getQuantity()) {
+                        
+                        //  On change la quantité de l'offre de moins la demande
+                        off.setQuantity(off.getQuantity()-nee.getQuantity());
+                        System.out.println("L'achat du produit ("+nee.getGood().getName()+
+                                ") par " + con.getName()+
+                                " dans la quantité de "+ String.valueOf(nee.getQuantity())+
+                                " s'effectue avec la société qui offre au prix de : "+
+                                off.getPrice());
+                        
+                        //  L'offre ok, on sort de la boucle
+                        break;
+                    } else {
+                        
+                        //  Uniquement pour le test. On affiche comme quoi c'est pas possible
+                        //  avec cette offre.
+                        System.out.println("Le besoin de "+con.getName()+
+                                " pour "+String.valueOf(nee.getQuantity())+
+                                " ne peut plus être satisfait... avec le prix de "+
+                                off.getPrice());
+                    }
+                }
+                
+            }               
+        }
+        displayMenu("Fin de la simulation du marché");
     }
 
 }
