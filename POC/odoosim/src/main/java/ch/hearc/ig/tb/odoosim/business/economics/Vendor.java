@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ch.hearc.ig.tb.odoosim.businesstwo;
+package ch.hearc.ig.tb.odoosim.business.economics;
 
 import java.util.ArrayList;
 
@@ -11,18 +11,18 @@ import java.util.ArrayList;
  *
  * @author tomant
  */
-public class Consumer {
+public class Vendor {
     private int identifier;
     private String name;
-    private ArrayList<Need> needs;
-    private ArrayList<Exchange> transactions;
     private Region localisation;
+    private ArrayList<Offer> warehouses;
+    private ArrayList<Exchange> transactions;
 
-    public Consumer(int identifier, String name, Region region) {
+    public Vendor(int identifier, String name, Region region) {
         this.identifier = identifier;
         this.name = name;
         localisation = region;
-        needs = new ArrayList<>();
+        warehouses = new ArrayList<>();
         transactions = new ArrayList<>();
     }
 
@@ -50,17 +50,17 @@ public class Consumer {
         this.localisation = localisation;
     }
     
-    public ArrayList<Need> getNeeds() {
-        return needs;
+    public ArrayList<Offer> getWarehouses() {
+        return warehouses;
     }
 
     public ArrayList<Exchange> getTransactions() {
         return transactions;
     }
-    
-    public void addNeed(Need need, Market m) {
-        needs.add(need);
-        m.setAllNeeds(need);
+
+    public void addOffer(Offer offer, Market m) {
+        warehouses.add(offer);
+        m.setAllOffers(offer);
     }
     
     public void addTransaction(Exchange ex) {

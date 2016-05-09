@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ch.hearc.ig.tb.odoosim.businesstwo;
+package ch.hearc.ig.tb.odoosim.business.economics;
 
 /**
  *
  * @author tomant
  */
-public class Grocery extends Channel {
+public class Ecommerce extends Channel {
     
-    public Grocery(String name, int paymentTerms) {
+    public Ecommerce(String name, int paymentTerms) {
         super(name, paymentTerms);
     }
     

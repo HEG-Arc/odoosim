@@ -3,29 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ch.hearc.ig.tb.odoosim.businesstwo;
-
-import java.util.ArrayList;
+package ch.hearc.ig.tb.odoosim.business.economics;
 
 /**
  *
  * @author tomant
  */
-public abstract class Good {
-    private int identifier;
+public class Region {
     private String name;
 
-    public Good(int identifier, String name) {
-        this.identifier = identifier;
+    public Region(String name) {
         this.name = name;
-    }
-
-    public int getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(int identifier) {
-        this.identifier = identifier;
     }
 
     public String getName() {
@@ -35,4 +23,5 @@ public abstract class Good {
     public void setName(String name) {
         this.name = name;
     }
+    
 }

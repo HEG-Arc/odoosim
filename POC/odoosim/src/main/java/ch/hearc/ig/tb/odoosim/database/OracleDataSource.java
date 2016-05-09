@@ -15,7 +15,7 @@ public class OracleDataSource {
     private static DataSource ds = null;
     private static PooledConnection pool = null;
     
-    public static Connection getConnection(){
+    public static Connection getConnection(String server, String db, String user, String pass){
         
        Connection connection = null;
         try{
@@ -24,11 +24,11 @@ public class OracleDataSource {
                 ds = new OracleConnectionPoolDataSource();
                 //  Paramétres globaux de la connexion
                 ((OracleConnectionPoolDataSource)ds).setDriverType("thin");
-                ((OracleConnectionPoolDataSource)ds).setServerName("ne-ege-leto.ig.he-arc.ch");
+                ((OracleConnectionPoolDataSource)ds).setServerName(server);
                 ((OracleConnectionPoolDataSource)ds).setPortNumber(1521);
-                ((OracleConnectionPoolDataSource)ds).setDatabaseName("ens");
-                ((OracleConnectionPoolDataSource)ds).setUser("anthony_tomat");
-                ((OracleConnectionPoolDataSource)ds).setPassword("anthony_tomat");
+                ((OracleConnectionPoolDataSource)ds).setDatabaseName(db);
+                ((OracleConnectionPoolDataSource)ds).setUser(user);
+                ((OracleConnectionPoolDataSource)ds).setPassword(pass);
             }
             
             //  Création du Pool de connexion

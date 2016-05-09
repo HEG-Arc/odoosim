@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ch.hearc.ig.tb.odoosim.businesstwo;
+package ch.hearc.ig.tb.odoosim.business.interactions;
 
 /**
  *
  * @author tomant
  */
-public class Hypermarket extends Channel {
-    
-    public Hypermarket(String name, int paymentTerms) {
-        super(name, paymentTerms);
-    }
-    
+public interface iCrud {
+    public void create();
+    public void read();
+    public void update();
+    public void delete();
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ch.hearc.ig.tb.odoosim.businesstwo;
+package ch.hearc.ig.tb.odoosim.business.economics;
 
 import java.util.Date;
 

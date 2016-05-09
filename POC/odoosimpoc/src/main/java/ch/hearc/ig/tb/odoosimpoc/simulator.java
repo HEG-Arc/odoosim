@@ -3,16 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ch.hearc.ig.tb.odoosim.businesstwo;
+package ch.hearc.ig.tb.odoosimpoc.view;
 
 /**
  *
  * @author tomant
  */
-public class Ecommerce extends Channel {
-    
-    public Ecommerce(String name, int paymentTerms) {
-        super(name, paymentTerms);
+public class simulator {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
     }
     
 }
