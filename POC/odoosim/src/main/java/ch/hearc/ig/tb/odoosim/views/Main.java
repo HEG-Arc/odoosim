@@ -31,7 +31,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import oracle.sql.STRUCT;
 
 public class Main {
 
@@ -52,7 +55,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            
+
             if (prop.size() < 1 || input == null) {
                 input = new FileInputStream("sim.properties");
                 prop.load(input);
@@ -64,7 +67,7 @@ public class Main {
                 oracleUser = prop.getProperty("oracle.username");
                 oraclePassword = prop.getProperty("oracle.password");
             }
-            
+
             switch (getMenu()) {
                 case "1":
                     connection(database, username, password);
@@ -89,6 +92,10 @@ public class Main {
                     TestPattern();
                     main(null);
                     break;
+                case "8":
+                    getSomethings();
+                case "9":
+                    viewDetailsRecord();
                 case "X":
                     break;
             }
@@ -111,6 +118,8 @@ public class Main {
         System.out.println("[5] Tester la génération de quantité");
         System.out.println("[6] Simuler le temps qui passe (toute les 30 secondes)");
         System.out.println("[7] Tester le pattern Strategy");
+        System.out.println("[8] Requêter un modèle");
+        System.out.println("[9] Récupération des détails");
         System.out.println("[X] Mettre fin au simulateur");
 
         Scanner sc = new Scanner(System.in);
@@ -134,6 +143,46 @@ public class Main {
             System.out.println("Effectué avec succès avec l'identifiant N° " + uid + " référencé");
         } catch (Exception e) {
             System.out.println("Erreur : " + e.getMessage());
+        } finally {
+            main(null);
+        }
+    }
+
+    private static void getSomethings() {
+        try {
+            System.out.println("Veuillez indiquer le modèle à requêter ?");
+            String model = SCR.nextLine();
+            String dns = "odoo.com";
+            String URL = "https://" + database + "." + dns;
+            Object[] params = new Object[]{database, username, password};
+
+            final XmlRpcClient models = new XmlRpcClient() {
+                {
+                    setConfig(new XmlRpcClientConfigImpl() {
+                        {
+                            setServerURL(new URL(String.format("%s/xmlrpc/2/object", URL)));
+                        }
+                    });
+                }
+            };
+
+            List<Object> asList = asList((Object[]) models.execute("execute_kw", asList(
+                    database, uid, password,
+                    model, "search",
+                    asList(asList(
+                            asList("is_company", "=", true),
+                            asList("customer", "=", true)))
+            )));
+
+            if (asList.size() > 0) {
+                System.out.println("Résultat :");
+                for (Object o : asList) {
+                    System.out.println(o.toString());
+                }
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Error : " + ex.getMessage());
         } finally {
             main(null);
         }
@@ -357,5 +406,47 @@ public class Main {
         Invoice<String> ivi2 = new Invoice<>(new alternative(), identifiant);
         System.out.println(ivi.getIdentifier());
         System.out.println(ivi2.getIdentifier());
+    }
+
+    public static void viewDetailsRecord() {
+
+        try {
+
+            System.out.println("Indiquer un id valide : ");
+            String idstring = SCR.nextLine();
+            int id = Integer.parseInt(idstring);
+            String dns = "odoo.com";
+            String URL = "https://" + database + "." + dns;
+            Object[] params = new Object[]{database, username, password};
+
+            final XmlRpcClient models = new XmlRpcClient() {
+                {
+                    setConfig(new XmlRpcClientConfigImpl() {
+                        {
+                            setServerURL(new URL(String.format("%s/xmlrpc/2/object", URL)));
+                        }
+                    });
+                }
+            };
+
+            final Map record = (Map) ((Object[]) models.execute(
+                    "execute_kw", asList(
+                            database, uid, password,
+                            "res.partner", "read",
+                            asList(id)
+                    )
+            ))[0];
+
+            Set records = record.entrySet();
+            Iterator<Object> iR = records.iterator();
+            System.out.println("Résultat : ");
+            while (iR.hasNext()) {
+                iR.next().toString();
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Error : " + ex.getMessage());
+        } finally {main(null);}
+
     }
 }
