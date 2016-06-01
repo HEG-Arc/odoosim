@@ -2,11 +2,15 @@ package ch.hearc.ig.tb.odoosimulator.odoointeractions;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
@@ -45,5 +49,33 @@ public class OdooAPI {
         clientObject.execute("execute_kw", 
                 asList(database, uidAccess, password, model, "create",
                         asList(data)));
+    }
+    
+    public int searchProduct() throws Exception {
+        List resultat = asList((Object[]) clientObject.execute("execute_kw", asList(
+                database, uidAccess, password,
+                "product.template", "search_read",
+                asList(asList(
+                        asList("name", "=", "Pot de miel 1kg"))),
+                new HashMap() {{
+                    put("fields", asList("id"));}}
+        )));
+        
+        HashMap hsM = (HashMap) resultat.get(0);
+        return (int) hsM.get("id");
+    }
+    
+    public int searchWarehouse() throws Exception {
+        List resultat = asList((Object[]) clientObject.execute("execute_kw", asList(
+                database, uidAccess, password,
+                "stock.location", "search_read",
+                asList(asList(
+                        asList("name", "=", "Stock"))),
+                new HashMap() {{
+                    put("fields", asList("id"));}}
+        )));
+        
+        HashMap hsM = (HashMap) resultat.get(0);
+        return (int) hsM.get("id");
     }
 }
