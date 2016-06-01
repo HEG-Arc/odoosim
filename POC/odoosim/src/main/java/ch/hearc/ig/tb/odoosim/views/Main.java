@@ -132,8 +132,7 @@ public class Main {
         try {
             System.out.println("Test d'authentification !");
             String dns = "odoo.com";
-            String URL = "https://" + database + "." + dns;
-            Object[] params = new Object[]{database, username, password};
+            String URL = "https://edu-c1." + dns;
 
             XmlRpcClientConfigImpl clientConfiguration = new XmlRpcClientConfigImpl();
             clientConfiguration.setServerURL(new URL(String.format("%s/xmlrpc/2/common", URL)));

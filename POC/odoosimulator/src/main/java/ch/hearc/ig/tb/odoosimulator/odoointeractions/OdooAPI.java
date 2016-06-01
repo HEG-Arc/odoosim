@@ -22,11 +22,11 @@ public class OdooAPI {
         this.database = database;
         password = "Welcome";
         configuration = new XmlRpcClientConfigImpl();
-        configuration.setServerURL(new URL(String.format("%s/xmlrpc/2/common", this.database)));
+        configuration.setServerURL(new URL(String.format("%s/xmlrpc/2/common", "https://"+this.database+".odoo.com")));
         clientCommon = new XmlRpcClient();
         clientCommon.setConfig(configuration);
         uidAccess = getUID();
-        configuration.setServerURL(new URL(String.format("%s/xmlrpc/2/object", this.database)));
+        configuration.setServerURL(new URL(String.format("%s/xmlrpc/2/object", "https://"+this.database+".odoo.com")));
         clientObject = new XmlRpcClient();
         clientObject.setConfig(configuration);
     }

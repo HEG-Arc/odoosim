@@ -130,7 +130,7 @@ public class Simulator {
     
     private int createCompanies() {
         try {
-            String access = "https://edu-c1.odoo.com";
+            String access = "edu-c1";
             Company comp = new Company(access, "Mister Ture A", market);
             this.market.setCompanies(comp);
             return 1;
