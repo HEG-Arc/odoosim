@@ -184,6 +184,7 @@ public class Simulator {
         
         for(Company c : market.getCompanies())
             c.masterDataCreation();
+        
     }
     
     public void roundExecution() {

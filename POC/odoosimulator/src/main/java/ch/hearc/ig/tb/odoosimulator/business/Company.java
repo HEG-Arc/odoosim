@@ -2,6 +2,7 @@ package ch.hearc.ig.tb.odoosimulator.business;
 
 import ch.hearc.ig.tb.odoosimulator.odoointeractions.OdooAPI;
 import java.net.URL;
+import java.util.HashMap;
 
 public class Company {
     
@@ -37,7 +38,10 @@ public class Company {
     }
     
     public void masterDataCreation() throws Exception {
-        for(Customer c : market.getCustomers())
-            wsapi.createPartner(c.getName());
+        for(Customer c : market.getCustomers()) {
+            HashMap data = new HashMap();
+            data.put("name", c.getName());
+            wsapi.create(data, "res.partner");
+        }
     }
 }

@@ -40,4 +40,10 @@ public class OdooAPI {
                 asList(database, uidAccess, password, "res.partner", "create",
                         asList(new HashMap(){{put("name", name);}})));
     }
+    
+    public void create(HashMap data, String model ) throws Exception {
+        clientObject.execute("execute_kw", 
+                asList(database, uidAccess, password, model, "create",
+                        asList(data)));
+    }
 }
