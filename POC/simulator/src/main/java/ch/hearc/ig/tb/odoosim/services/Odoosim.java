@@ -25,13 +25,13 @@ public class Odoosim {
     
     private String accountOdoo;
     private String passworOdoo;
-    private List<Company> teams;
+    private List<Company> companies;
     private final Odoo wsapi;
     
     public Odoosim() {
         accountOdoo = "";
         passworOdoo = "";
-        teams = new ArrayList<>();
+        companies = new ArrayList<>();
         wsapi = new Odoo("https", "odoo.com");
     }
     
@@ -48,38 +48,37 @@ public class Odoosim {
         passworOdoo = getDataXML(scenario, xPathQuery).get(0);
         
         //  Lecture des équipes et test des connexions
-        xPathQuery = "//team/@name";
+        xPathQuery = "//company/@name";
         queryResults = getContentsListOfSelectItem(scenario, xPathQuery);
         for(int i=0;i<queryResults.size();i++) {
             List<String> subQR;
             Company c = new Company(queryResults.get(i));
             
-            xPathQuery = "//team[@name='"+queryResults.get(i)+"']/erp/@database ";
+            xPathQuery = "//company[@name='"+queryResults.get(i)+"']/erp/@database ";
             subQR = getContentsListOfSelectItem(scenario, xPathQuery);
             c.setErp(subQR.get(0));
             c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
-            teams.add(c);
+            companies.add(c);
         }
         
         //  Création des équipes grâce au XML
-        for(int i=0;i<teams.size();i++) {
+        for(int i=0;i<companies.size();i++) {
             
             //  Récupération des informations sur les joueurs
-            xPathQuery = "//team[@name='"+teams.get(i).getName()+"']/players/player";
+            xPathQuery = "//company[@name='"+companies.get(i).getName()+"']/players/player";
             queryResults = getContentsListOfSelectItem(scenario, xPathQuery);
-            parseResult(queryResults);
             
             for(int ii=0;ii<queryResults.size();ii++) {
                 Collaborator collabo = new Collaborator(queryResults.get(ii));
                 
-                xPathQuery = "//team[@name='"+teams.get(i).getName()+"']/players/player["+(ii+1)+"]/@login";
+                xPathQuery = "//company[@name='"+companies.get(i).getName()+"']/players/player["+(ii+1)+"]/@login";
                 collabo.setMail(getContentsListOfSelectItem(scenario, xPathQuery).get(0));
-                xPathQuery = "//team[@name='"+teams.get(i).getName()+"']/players/player["+(ii+1)+"]/@password";
+                xPathQuery = "//company[@name='"+companies.get(i).getName()+"']/players/player["+(ii+1)+"]/@password";
                 collabo.setPassword(getContentsListOfSelectItem(scenario, xPathQuery).get(0));
-                teams.get(i).addCollaborators(collabo);
+                companies.get(i).addCollaborators(collabo);
                 
                 //  Création du compte participant dans l'ERP -- Pas fonctionnel les noms changent d'une base à l'autre !
-                List<Collaborator> collaborators = (List<Collaborator>) teams.get(i).getCollaborators();
+                List<Collaborator> collaborators = (List<Collaborator>) companies.get(i).getCollaborators();
                 data.clear();
                 data.put("name", collaborators.get(ii).getName());
                 data.put("login", collaborators.get(ii).getMail());
@@ -94,7 +93,7 @@ public class Odoosim {
                 data.put("in_group_17", true);
                 data.put("in_group_15", true);
                 data.put("in_group_11", false);
-                wsapi.addElement(teams.get(i).getErp(), "res.users", data, teams.get(i).getUidapiaccess(), passworOdoo);
+                wsapi.addElement(companies.get(i).getErp(), "res.users", data, companies.get(i).getUidapiaccess(), passworOdoo);
             }
             
             //  Création des contacts (fournisseurs, banque et actionnaire)
@@ -106,13 +105,13 @@ public class Odoosim {
                 data.put("company_type", getContentsListOfSelectItem(scenario, "//contact["+(ii+1)+"]/@company_type").get(0));
                 data.put("customer", getContentsListOfSelectItem(scenario, "//contact["+(ii+1)+"]/@customer").get(0));
                 data.put("supplier", getContentsListOfSelectItem(scenario, "//contact["+(ii+1)+"]/@supplier").get(0));
-                wsapi.addElement(teams.get(i).getErp(), "res.partner", data, teams.get(i).getUidapiaccess(), passworOdoo);
+                wsapi.addElement(companies.get(i).getErp(), "res.partner", data, companies.get(i).getUidapiaccess(), passworOdoo);
             }
             
             //  Création de matières premières
             queryResults = getContentsListOfSelectItem(scenario, "//product_purchasable");
             for(int ii=0;ii<queryResults.size();ii++) {
-                int idSupplier = wsapi.searchVendorByName(teams.get(i).getErp(), teams.get(i).getUidapiaccess(), passworOdoo, getContentsListOfSelectItem(scenario, "//product_purchasable["+(ii+1)+"]/@supplier").get(0));
+                int idSupplier = wsapi.searchVendorByName(companies.get(i).getErp(), companies.get(i).getUidapiaccess(), passworOdoo, getContentsListOfSelectItem(scenario, "//product_purchasable["+(ii+1)+"]/@supplier").get(0));
                 String stndPrice = getContentsListOfSelectItem(scenario, "//product_purchasable["+(ii+1)+"]/@standard_price").get(0);
                 data.put("name", getContentsListOfSelectItem(scenario, "//product_purchasable["+(ii+1)+"]/name").get(0));
                 data.put("type", getContentsListOfSelectItem(scenario, "//product_purchasable["+(ii+1)+"]/@type").get(0));
@@ -125,7 +124,7 @@ public class Odoosim {
                         put("name", idSupplier);
                         put("min_qty", 1.00);
                         put("price", stndPrice);}})));
-                wsapi.addElement(teams.get(i).getErp(), "product.template", data, teams.get(i).getUidapiaccess(), passworOdoo);
+                wsapi.addElement(companies.get(i).getErp(), "product.template", data, companies.get(i).getUidapiaccess(), passworOdoo);
             }
             
             //  Création des produits destinés à la vente

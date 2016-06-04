@@ -5,29 +5,27 @@
         <password>Welcome</password>
     </odoo>
     <companies>
-        <teams>
-            <team name="Team_A">
-                <erp database="edu-03062016g1"/>
-                <players>
-                    <player login="a1@mailinator.com" password="Welcome">A1</player>
-                    <player login="a2@mailinator.com" password="Welcome">A2</player>
-                    <player login="a3@mailinator.com" password="Welcome">A3</player>
-                </players>
-            </team>
-            <team name="Team_B">
-                <erp database="edu-03062016g2"/>
-                <players>
-                    <player login="b1@mailinator.com" password="Welcome">B1</player>
-                    <player login="b2@mailinator.com" password="Welcome">B2</player>
-                </players>
-            </team>
-            <team name="Team_C">
-                <erp database="edu-03062016g3"/>
-                <players>
-                    <player login="c1@mailinator.com" password="Welcome">C1</player>
-                </players>
-            </team>
-        </teams>
+        <company name="Team_A">
+            <erp database="edu-3igpta"/>
+            <players>
+                <player login="a1@mailinator.com" password="Welcome">Anthony Tomat</player>
+                <player login="a2@mailinator.com" password="Welcome">Marcel Grosjean</player>
+                <player login="a3@mailinator.com" password="Welcome">Juan Fernandez</player>
+            </players>
+        </company>
+        <company name="Team_B">
+            <erp database="edu-3igptb"/>
+            <players>
+                <player login="b1@mailinator.com" password="Welcome">François Gatherat</player>
+                <player login="b2@mailinator.com" password="Welcome">Julien Moser</player>
+            </players>
+        </company>
+        <company name="Team_C">
+            <erp database="edu-3igptc"/>
+            <players>
+                <player login="c1@mailinator.com" password="Welcome">Boris Fritscher</player>
+            </players>
+        </company>
     </companies>
     <scenario>
         <rounds>
