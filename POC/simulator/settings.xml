@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoosim>
+    <odoo protocole="https" dns="odoo.com">
+        <account>anthony.tomat@he-arc.ch</account>
+        <password>Welcome</password>
+    </odoo>
+    <companies>
+        <teams>
+            <team name="Team_A">
+                <erp database="edu-03062016g1"/>
+                <players>
+                    <player login="a1@mailinator.com" password="Welcome">A1</player>
+                    <player login="a2@mailinator.com" password="Welcome">A2</player>
+                    <player login="a3@mailinator.com" password="Welcome">A3</player>
+                </players>
+            </team>
+            <team name="Team_B">
+                <erp database="edu-03062016g2"/>
+                <players>
+                    <player login="b1@mailinator.com" password="Welcome">B1</player>
+                    <player login="b2@mailinator.com" password="Welcome">B2</player>
+                </players>
+            </team>
+            <team name="Team_C">
+                <erp database="edu-03062016g3"/>
+                <players>
+                    <player login="c1@mailinator.com" password="Welcome">C1</player>
+                </players>
+            </team>
+        </teams>
+    </companies>
+    <scenario>
+        <rounds>
+            <round name="1" timeSeconds="60"/>
+            <round name="2" timeSeconds="60"/>
+        </rounds>
+        <contacts model="res.partner">
+            <contact company_type="company" customer="false" supplier="true">Mr. BlaBla</contact>
+            <contact company_type="company" customer="false" supplier="false">VUBS SA</contact>
+            <contact company_type="company" customer="false" supplier="false">Breweries Holding Corp.</contact>
+        </contacts>
+        <products model="product.template">
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="15.00" supplier="Mr. BlaBla" initial_qty="1000"><name>Houblon</name></product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="19.00" supplier="Mr. BlaBla" initial_qty="1000"><name>Orge</name></product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="1.00" supplier="Mr. BlaBla" initial_qty="1000"><name>Eau</name></product_purchasable>
+            <product_sellable type="product" default_code="BW01A" list_price="2.00" standard_price="2.00">
+                <name>Lager Beer</name>
+                <bom model="mrp.bom" product_qty="1" type="normal">
+                    <bomline name="bom_line_ids" quantity="10">Houblon</bomline>
+                    <bomline name="bom_line_ids" quantity="10">Eau</bomline>
+                    <bomline name="bom_line_ids" quantity="10">Orge</bomline>
+                </bom>
+            </product_sellable>
+        </products>
+        <demand>
+            <customers>
+                <customer name="lowincome" volum="1000" elasticitySensibility="15.00"/>                
+            </customers>
+        </demand>
+        <accounting>
+                    <account code="10201">
+                        150000.00
+                    </account>
+                    <account code="1500">
+                        450000.00
+                    </account>
+                    <account code="1600">
+                        725000.00
+                    </account>
+                    <account code="1600">
+                        1000000.00
+                    </account>
+                    <account code="2800">
+                        400000.00
+                    </account>
+                    <account code="2400">
+                        1200000.00
+                    </account>
+        </accounting>
+    </scenario>
+</odoosim>
