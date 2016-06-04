@@ -1,45 +1,48 @@
 package ch.hearc.ig.tb.odoosim.business;
 
-import java.util.*;
+public abstract class Product {
+    
+    private int id;
+    private String code;
+    private String name;
+    private Double purchasePrice;
 
-public class Product {
+    public Product(String code, String name, Double purchasePrice) {
+        this.code = code;
+        this.name = name;
+        this.purchasePrice = purchasePrice;
+    }
 
-	private Collection<Offer> suppliers;
-	private int id;
-	private String code;
-	private String name;
-	private Double indicativePrice;
+    public int getId() {
+        return id;
+    }
 
-	public int getId() {
-		return this.id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public String getCode() {
-		return this.code;
-	}
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Double getPurchasePrice() {
+        return purchasePrice;
+    }
 
-	public Double getIndicativePrice() {
-		return this.indicativePrice;
-	}
-
-	public void setIndicativePrice(Double indicativePrice) {
-		this.indicativePrice = indicativePrice;
-	}
-
+    public void setPurchasePrice(Double purchasePrice) {
+        this.purchasePrice = purchasePrice;
+    }
+    
 }

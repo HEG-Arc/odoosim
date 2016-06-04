@@ -33,9 +33,9 @@
             <round name="2" timeSeconds="60"/>
         </rounds>
         <contacts model="res.partner">
-            <contact company_type="company" customer="false" supplier="true">Mr. BlaBla</contact>
-            <contact company_type="company" customer="false" supplier="false">VUBS SA</contact>
-            <contact company_type="company" customer="false" supplier="false">Breweries Holding Corp.</contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier">Mr. BlaBla</contact>
+            <contact company_type="company" customer="false" supplier="false" type="banker">VUBS SA</contact>
+            <contact company_type="company" customer="false" supplier="false" type="shareholder">Breweries Holding Corp.</contact>
         </contacts>
         <products model="product.template">
             <product_purchasable type="product" default_code="" list_price="0.00" standard_price="15.00" supplier="Mr. BlaBla" initial_qty="1000"><name>Houblon</name></product_purchasable>
@@ -50,11 +50,47 @@
                 </bom>
             </product_sellable>
         </products>
-        <demand>
-            <customers>
-                <customer name="lowincome" volum="1000" elasticitySensibility="15.00"/>                
-            </customers>
-        </demand>
+        <markets volumDemandDay="10000">
+            <market area="est" part="30.00">
+                <customers>
+                    <type income="high" elasticty="5.00">
+                        <customers part="10.00"/>
+                    </type>
+                    <type income="middle" elasticty="9.00">
+                        <customers part="60.00"/>
+                    </type>
+                    <type income="low" elasticty="15.00">
+                        <customers part="30.00"/>
+                    </type>
+                </customers>
+            </market>
+            <market area="central" part="20.00">
+                <customers>
+                    <type income="high" elasticty="5.00">
+                        <customers part="10.00"/>
+                    </type>
+                    <type income="middle" elasticty="9.00">
+                        <customers part="60.00"/>
+                    </type>
+                    <type income="low" elasticty="15.00">
+                        <customers part="30.00"/>
+                    </type>
+                </customers>
+            </market>
+            <market area="ouest" part="50.00">
+                <customers volumPerDay="10000">
+                    <type income="high" elasticty="5.00">
+                        <customers part="10.00"/>
+                    </type>
+                    <type income="middle" elasticty="9.00">
+                        <customers part="60.00"/>
+                    </type>
+                    <type income="low" elasticty="15.00">
+                        <customers part="30.00"/>
+                    </type>
+                </customers>
+            </market>
+        </markets>
         <accounting>
                     <account code="10201">
                         150000.00

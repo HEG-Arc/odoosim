@@ -15,6 +15,8 @@ public class Company {
     private String erp;
     private int uidapiaccess;
     private Collection<Collaborator> collaborators;
+    private Banker banker;
+    private Shareholder shareholder;
 
     public Company(String name) {
         this.name = name;
@@ -76,9 +78,30 @@ public class Company {
     public void setCollaborators(Collection<Collaborator> collaborators) {
         this.collaborators = collaborators;
     }
+
+    public Banker getBanker() {
+        return banker;
+    }
+
+    public void setBanker(Banker banker) {
+        this.banker = banker;
+    }
+
+    public Shareholder getShareholder() {
+        return shareholder;
+    }
+
+    public void setShareholder(Shareholder shareholder) {
+        this.shareholder = shareholder;
+    }
     
     public void addCollaborators(Collaborator c) {
         c.setCompany(this);
         this.collaborators.add(c);
+    }
+    
+    public void addOffer(Offer o, Product p) {
+        o.setProduct(p);
+        this.offers.add(o);
     }
 }
