@@ -3,10 +3,11 @@
     <odoo protocole="https" dns="odoo.com">
         <account>anthony.tomat@he-arc.ch</account>
         <password>Welcome</password>
+        <dbtemplate>edu-odoosim-template</dbtemplate>
     </odoo>
     <companies>
         <company name="Team_A">
-            <erp database="edu-odoosim-igpta-050616"/>
+            <erp database="edu-odoosim-template-000"/>
             <players>
                 <player login="a1@mailinator.com" password="Welcome">Anthony Tomat</player>
                 <player login="a2@mailinator.com" password="Welcome">Marcel Grosjean</player>
@@ -148,24 +149,82 @@
             </market>
         </markets>
         <accounting>
-            <account code="10201">
-                150000.00
-            </account>
-            <account code="1500">
-                450000.00
-            </account>
-            <account code="1600">
-                725000.00
-            </account>
-            <account code="1600">
-                1000000.00
-            </account>
-            <account code="2800">
-                400000.00
-            </account>
-            <account code="2400">
-                1200000.00
-            </account>
+            <journalentry>
+                <name>Bank</name>
+                <items>
+                    <item>
+                        <account>
+                            <number>10201</number>
+                        </account>
+                        <partner>
+                            <name>VUBS SA</name>
+                        </partner>
+                        <label>Sàn</label>
+                        <amountdebit>150000.00</amountdebit>
+                        <amountcredit>00.00</amountcredit>
+                    </item>
+                    <item>
+                        <account>
+                            <number>2100</number>
+                        </account>
+                        <partner>
+                            <name>VUBS SA</name>
+                        </partner>
+                        <label>Octroi du crédit initial</label>
+                        <amountdebit>00.00</amountdebit>
+                        <amountcredit>1200000.00</amountcredit>
+                    </item>
+                    <item>
+                        <account>
+                            <number>1600</number>
+                        </account>
+                        <partner>
+                            <name>VUBS SA</name>
+                        </partner>
+                        <label>Achat immeuble et terrain</label>
+                        <amountdebit>1000000.00</amountdebit>
+                        <amountcredit>00.00</amountcredit>
+                    </item>
+                    <item>
+                        <account>
+                            <number>1500</number>
+                        </account>
+                        <partner>
+                            <name>VUBS SA</name>
+                        </partner>
+                        <label>Achat d'une partie de l'installation de production</label>
+                        <amountdebit>50000.00</amountdebit>
+                        <amountcredit>00.00</amountcredit>
+                    </item>
+                </items>
+            </journalentry>
+            <journalentry>
+                <name>Miscellaneous Operations</name>
+                <items>
+                    <item>
+                        <account>
+                            <number>1500</number>
+                        </account>
+                        <partner>
+                            <name>VUBS SA</name>
+                        </partner>
+                        <label>Achat d'une partie de l'installation de production</label>
+                        <amountdebit>400000.00</amountdebit>
+                        <amountcredit>00.00</amountcredit>
+                    </item>
+                    <item>
+                        <account>
+                            <number>2800</number>
+                        </account>
+                        <partner>
+                            <name>Breweries Holding Corp.</name>
+                        </partner>
+                        <label>Apport en capital de la Holding</label>
+                        <amountdebit>00.00</amountdebit>
+                        <amountcredit>400000.00</amountcredit>
+                    </item>
+                </items>
+            </journalentry>
         </accounting>
     </scenario>
 </odoosim>

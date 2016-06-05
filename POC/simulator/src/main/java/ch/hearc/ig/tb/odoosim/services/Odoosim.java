@@ -11,7 +11,6 @@ import static ch.hearc.ig.tb.odoosim.utils.Utility.*;
 import static java.util.Arrays.asList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map.Entry;
 
 public class Odoosim {
 
@@ -66,8 +65,9 @@ public class Odoosim {
         while(iC2.hasNext()) {
             Company c = iC2.next();
             createMasterDataBOM(c);
+            createAccountingStructure(c);
         }
-        
+        //createAccountingStructure(companies.get(0));
         writeLn(typeOfMessage.INFO, "Configuration terminée");
     }
 
@@ -304,6 +304,31 @@ public class Odoosim {
                 wsapi.addElement(c.getErp(), "mrp.bom", data, c.getUidapiaccess(), passworOdoo);
             }
                 
+        }
+    }
+    
+    public void createAccountingStructure(Company c) throws Exception {
+        HashMap data = new HashMap();
+        List<String> journals = getContentsListOfSelectItem(scenario, "//accounting/journalentry");
+        for (int i = 0; i < journals.size(); i++) {
+            String name = getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/name").get(0);
+            data.put("journal_id", wsapi.searchID(c.getErp(), c.getUidapiaccess(), passworOdoo, "account.journal",name));
+            List<String> entries = getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/items/item");
+            List aList = new ArrayList<>();
+            for(int ii=0; ii<entries.size(); ii++) {
+                HashMap hsmap = new HashMap<String, Object>();
+                hsmap.put("account_id", wsapi.searchAccountByCode(c.getErp(), c.getUidapiaccess(), passworOdoo, "account.account", 
+                                getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/items/item[" + (ii+1) + "]/account/number").get(0)));
+                hsmap.put("partner_id", wsapi.searchID(c.getErp(), c.getUidapiaccess(), passworOdoo, "res.partner", 
+                        getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/items/item[" + (ii+1) + "]/partner/name").get(0)));
+                hsmap.put("name", getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/items/item[" + (ii+1) + "]/label").get(0));
+                hsmap.put("debit", Double.parseDouble(getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/items/item[" + (ii+1) + "]/amountdebit").get(0)));
+                hsmap.put("credit", Double.parseDouble(getContentsListOfSelectItem(scenario, "//accounting/journalentry[" + (i+1) + "]/items/item[" + (ii+1) + "]/amountcredit").get(0)));
+                aList.add(asList(0, false, hsmap));
+            }
+            data.put("line_ids", aList);
+            data.put("state", "posted");
+            wsapi.addElement(c.getErp(), "account.move", data, c.getUidapiaccess(), passworOdoo);
         }
     }
     
