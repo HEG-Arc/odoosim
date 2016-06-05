@@ -7,6 +7,9 @@ package ch.hearc.ig.tb.odoosim.business;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -16,11 +19,18 @@ public class Good extends Product {
     
     private Collection<Offer> vendors;
     private Double indicativeSalePrice;
+    //  Key = id Raw Material, Value = quantity of RM
+    private Map<Integer, Integer> billOfMaterials;
+    
+    public Good(String name) {
+        super(name);
+    }
 
     public Good(Double indicativeSalePrice, String code, String name, Double purchasePrice) {
         super(code, name, purchasePrice);
         this.vendors = new ArrayList<>();
         this.indicativeSalePrice = indicativeSalePrice;
+        this.billOfMaterials = new HashMap();
     }
 
     public Collection<Offer> getVendors() {
@@ -37,6 +47,34 @@ public class Good extends Product {
 
     public void setIndicativeSalePrice(Double indicativeSalePrice) {
         this.indicativeSalePrice = indicativeSalePrice;
+    }
+
+    public Map getBillOfMaterials() {
+        return billOfMaterials;
+    }
+
+    public void setBillOfMaterials(HashMap billOfMaterials) {
+        this.billOfMaterials = billOfMaterials;
+    }
+    
+    public void addBOM(int idProduct, int quantity) {
+        this.billOfMaterials.put(idProduct, quantity);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getName());
+    }
+    
+    @Override
+    public boolean equals(Object good) {
+        if(this == good)
+            return true;
+        if(this.getClass() != good.getClass())
+            return false;
+        
+        Good gd = (Good) good;
+        return Objects.equals(this.getName(), gd.getName());
     }
     
 }

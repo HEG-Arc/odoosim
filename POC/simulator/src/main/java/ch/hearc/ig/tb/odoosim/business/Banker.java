@@ -5,6 +5,8 @@
  */
 package ch.hearc.ig.tb.odoosim.business;
 
+import java.util.Objects;
+
 public class Banker {
     
     private int id;
@@ -30,5 +32,19 @@ public class Banker {
         this.name = name;
     }
     
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name);
+    }
     
+    @Override
+    public boolean equals(Object banker) {
+        if(this == banker)
+            return true;
+        if(this.getClass() != banker.getClass())
+            return false;
+        
+        Banker b = (Banker) banker;
+        return Objects.equals(this.id, b.id) && Objects.equals(this.name, b.name);
+    }
 }

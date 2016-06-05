@@ -36,7 +36,7 @@ public class Utility {
         return result;
     }
     
-    public static void writeLn(typeOfMessage type, Object message) throws Exception {
+    public static void writeLn(typeOfMessage type, Object message) {
         try {
             if(message==null)
                 message = "Inconnu";
@@ -47,7 +47,7 @@ public class Utility {
         
         System.out.println(type + "" + message);
         } catch (Exception e) {
-           throw e;
+            System.out.println(typeOfMessage.ERROR + e.getMessage());
         }
     }
     

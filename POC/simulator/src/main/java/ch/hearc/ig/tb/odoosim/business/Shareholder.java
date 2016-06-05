@@ -5,6 +5,8 @@
  */
 package ch.hearc.ig.tb.odoosim.business;
 
+import java.util.Objects;
+
 /**
  *
  * @author tomant
@@ -33,5 +35,19 @@ public class Shareholder {
         this.name = name;
     }
     
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name);
+    }
     
+    @Override
+    public boolean equals(Object sh) {
+        if(this == sh)
+            return true;
+        if(this.getClass() != sh.getClass())
+            return false;
+        
+        Shareholder shh = (Shareholder) sh;
+        return Objects.equals(this.id, shh.id) && Objects.equals(this.name, shh.name);
+    }
 }

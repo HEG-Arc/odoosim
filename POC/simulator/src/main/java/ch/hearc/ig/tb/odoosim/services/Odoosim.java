@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.hearc.ig.tb.odoosim.services;
 
 import ch.hearc.ig.tb.odoosim.business.*;
@@ -15,11 +10,9 @@ import org.w3c.dom.Document;
 import static ch.hearc.ig.tb.odoosim.utils.Utility.*;
 import static java.util.Arrays.asList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
-/**
- *
- * @author tomant
- */
 public class Odoosim {
 
     private String accountOdoo;
@@ -49,119 +42,33 @@ public class Odoosim {
         writeLn(typeOfMessage.INFO, "Début de la configuration");
         
         getOdooAccess();
+        generateStakeholders();
         generateCompanies();
         generateProduct();
-        generateStakeholders();
+        
+        Iterator<Company> iCompany = companies.iterator();
+        while(iCompany.hasNext()) {
+            Company c = iCompany.next();
+            tryConnection(c);
+            createMasterDataAccounts(c);
+            createMasterDataContacts(c, bankers.iterator());
+            createMasterDataContacts(c, suppliers.iterator());
+            createMasterDataContacts(c, shareholders.iterator());
+            createMasterDataRawMaterials(c);
+            createMasterDataProduct(c);
+        }
+        
+        //  Je fais la génération des BOM après avoir passé la première partie
+        //  du master data pour pouvoir lier avec l'id généré par Odoo lors de 
+        //  l'insertion.
+        generateBOM();
+        Iterator<Company> iC2 = companies.iterator();
+        while(iC2.hasNext()) {
+            Company c = iC2.next();
+            createMasterDataBOM(c);
+        }
         
         writeLn(typeOfMessage.INFO, "Configuration terminée");
-        
-        /* Avant le 04.06.2016 - Fonctionnel !
-        String xPathQuery;
-        List<String> queryResults;
-        HashMap data = new HashMap();
-
-        //  Récupération du compte d'accès à Odoo.com
-        xPathQuery = "//account";
-        accountOdoo = getDataXML(scenario, xPathQuery).get(0);
-        xPathQuery = "//password";
-        passworOdoo = getDataXML(scenario, xPathQuery).get(0);
-        
-        //  Lecture des équipes et test des connexions
-        xPathQuery = "//company/@name";
-        queryResults = getContentsListOfSelectItem(scenario, xPathQuery);
-        for (int i = 0; i < queryResults.size(); i++) {
-            List<String> subQR;
-            Company c = new Company(queryResults.get(i));
-
-            xPathQuery = "//company[@name='" + queryResults.get(i) + "']/erp/@database ";
-            subQR = getContentsListOfSelectItem(scenario, xPathQuery);
-            c.setErp(subQR.get(0));
-            c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
-            companies.add(c);
-        }
-
-        //  Création des équipes grâce au XML
-        for (int i = 0; i < companies.size(); i++) {
-
-            //  Récupération des informations sur les joueurs
-            xPathQuery = "//company[@name='" + companies.get(i).getName() + "']/players/player";
-            queryResults = getContentsListOfSelectItem(scenario, xPathQuery);
-
-            for (int ii = 0; ii < queryResults.size(); ii++) {
-                Collaborator collabo = new Collaborator(queryResults.get(ii));
-
-                xPathQuery = "//company[@name='" + companies.get(i).getName() + "']/players/player[" + (ii + 1) + "]/@login";
-                collabo.setMail(getContentsListOfSelectItem(scenario, xPathQuery).get(0));
-                xPathQuery = "//company[@name='" + companies.get(i).getName() + "']/players/player[" + (ii + 1) + "]/@password";
-                collabo.setPassword(getContentsListOfSelectItem(scenario, xPathQuery).get(0));
-                companies.get(i).addCollaborators(collabo);
-
-                //  Création du compte participant dans l'ERP -- Pas fonctionnel les noms changent d'une base à l'autre !
-                List<Collaborator> collaborators = (List<Collaborator>) companies.get(i).getCollaborators();
-                data.clear();
-                data.put("name", collaborators.get(ii).getName());
-                data.put("login", collaborators.get(ii).getMail());
-                data.put("sel_groups_9_27_10", 10);
-                data.put("sel_groups_34_35", false);
-                data.put("sel_groups_42_43", false);
-                data.put("sel_groups_23_24_25", false);
-                data.put("sel_groups_46_47", false);
-                data.put("sel_groups_4", 4);
-                data.put("sel_groups_1_2_3", false);
-                data.put("in_group_33", false);
-                data.put("in_group_17", true);
-                data.put("in_group_15", true);
-                data.put("in_group_11", false);
-                wsapi.addElement(companies.get(i).getErp(), "res.users", data, companies.get(i).getUidapiaccess(), passworOdoo);
-            }
-
-            //  Création des contacts (fournisseurs, banque et actionnaire)
-            queryResults = getContentsListOfSelectItem(scenario, "//contact");
-            for (int ii = 0; ii < queryResults.size(); ii++) {
-                data.clear();
-                data.put("name", getContentsListOfSelectItem(scenario, "//contact[" + (ii + 1) + "]").get(0));
-                data.put("company_type", getContentsListOfSelectItem(scenario, "//contact[" + (ii + 1) + "]/@company_type").get(0));
-                data.put("customer", getContentsListOfSelectItem(scenario, "//contact[" + (ii + 1) + "]/@customer").get(0));
-                data.put("supplier", getContentsListOfSelectItem(scenario, "//contact[" + (ii + 1) + "]/@supplier").get(0));
-                wsapi.addElement(companies.get(i).getErp(), "res.partner", data, companies.get(i).getUidapiaccess(), passworOdoo);
-            }
-
-            //  Création de matières premières
-            queryResults = getContentsListOfSelectItem(scenario, "//product_purchasable");
-            for (int ii = 0; ii < queryResults.size(); ii++) {
-                data.clear();
-                int idSupplier = wsapi.searchVendorByName(companies.get(i).getErp(), companies.get(i).getUidapiaccess(), passworOdoo, getContentsListOfSelectItem(scenario, "//product_purchasable[" + (ii + 1) + "]/@supplier").get(0));
-                String stndPrice = getContentsListOfSelectItem(scenario, "//product_purchasable[" + (ii + 1) + "]/@standard_price").get(0);
-                data.put("name", getContentsListOfSelectItem(scenario, "//product_purchasable[" + (ii + 1) + "]/name").get(0));
-                data.put("type", getContentsListOfSelectItem(scenario, "//product_purchasable[" + (ii + 1) + "]/@type").get(0));
-                data.put("default_code", getContentsListOfSelectItem(scenario, "//product_purchasable[" + (ii + 1) + "]/@default_code").get(0));
-                data.put("list_price", getContentsListOfSelectItem(scenario, "//product_purchasable[" + (ii + 1) + "]/@list_price").get(0));
-                data.put("standard_price", stndPrice);
-                data.put("sale_ok", false);
-                data.put("purchase_ok", true);
-                data.put("seller_ids", asList(asList(0, false, new HashMap<String, Object>() {
-                    {
-                        put("name", idSupplier);
-                        put("min_qty", 1.00);
-                        put("price", stndPrice);
-                    }
-                })));
-                wsapi.addElement(companies.get(i).getErp(), "product.template", data, companies.get(i).getUidapiaccess(), passworOdoo);
-            }
-
-            //  Création des produits destinés à la vente
-            queryResults = getContentsListOfSelectItem(scenario, "//product_sellable");
-            for (int ii = 0; ii < queryResults.size(); ii++) {
-                data.clear();
-                data.put("name", getContentsListOfSelectItem(scenario, "//product_sellable[" + (ii + 1) + "]/name").get(0));
-                data.put("type", getContentsListOfSelectItem(scenario, "//product_sellable[" + (ii + 1) + "]/@type").get(0));
-                data.put("default_code", getContentsListOfSelectItem(scenario, "//product_sellable[" + (ii + 1) + "]/@default_code").get(0));
-                data.put("list_price", getContentsListOfSelectItem(scenario, "//product_sellable[" + (ii + 1) + "]/@list_price").get(0));
-                data.put("standard_price", getContentsListOfSelectItem(scenario, "//product_sellable[" + (ii + 1) + "]/@standard_price").get(0));
-                data.put("sale_ok", true);
-                data.put("purchase_ok", false);
-            }
-        }*/
     }
 
     public void processingGame() throws Exception {
@@ -176,6 +83,15 @@ public class Odoosim {
 
     public void generateProduct() throws Exception {
         List<String> queryResults;
+        queryResults = getContentsListOfSelectItem(scenario, "//product_purchasable");
+        for (int i = 0; i < queryResults.size(); i++) {
+            Rawmaterial r = new Rawmaterial(getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/@default_code").get(0),
+                    getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/name").get(0),
+                    Double.parseDouble(getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/@standard_price").get(0)));
+            Supplier s = new Supplier(getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/supplier/name").get(0));
+            r.setSupplier((Supplier) searchElement(s, suppliers));
+            products.add(r);
+        }
         //  Création des produits destinés à la vente
         queryResults = getContentsListOfSelectItem(scenario, "//product_sellable");
         for (int i = 0; i < queryResults.size(); i++) {
@@ -184,14 +100,6 @@ public class Odoosim {
                     getContentsListOfSelectItem(scenario, "//product_sellable[" + (i + 1) + "]/name").get(0),
                     Double.parseDouble(getContentsListOfSelectItem(scenario, "//product_sellable[" + (i + 1) + "]/@standard_price").get(0)));
             products.add(g);
-        }
-
-        queryResults = getContentsListOfSelectItem(scenario, "//product_purchasable");
-        for (int i = 0; i < queryResults.size(); i++) {
-            Rawmaterial r = new Rawmaterial(getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/@default_code").get(0),
-                    getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/name").get(0),
-                    Double.parseDouble(getContentsListOfSelectItem(scenario, "//product_purchasable[" + (i + 1) + "]/@standard_price").get(0)));
-            products.add(r);
         }
     }
 
@@ -204,15 +112,20 @@ public class Odoosim {
             List<String> subQR = getContentsListOfSelectItem(scenario, "//company[@name='" + companies.get(i) + "']/erp/@database ");
             c.setErp(subQR.get(0));
             c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
-            this.companies.add(c);
             
-            List<String> collaborators = getContentsListOfSelectItem(scenario, "//company[@name='" + this.companies.get(i).getName() + "']/players/player");
+            List<String> collaborators = getContentsListOfSelectItem(scenario, "//company[@name='" + c.getName() + "']/players/player");
             for (int ii = 0; ii < collaborators.size(); ii++) {
                 Collaborator collabo = new Collaborator(collaborators.get(ii));
-                collabo.setMail(getContentsListOfSelectItem(scenario, "//company[@name='" + this.companies.get(i).getName() + "']/players/player[" + (ii + 1) + "]/@login").get(0));
-                collabo.setPassword(getContentsListOfSelectItem(scenario, "//company[@name='" + this.companies.get(i).getName() + "']/players/player[" + (ii + 1) + "]/@password").get(0));
-                this.companies.get(i).addCollaborators(collabo);
+                collabo.setMail(getContentsListOfSelectItem(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/@login").get(0));
+                collabo.setPassword(getContentsListOfSelectItem(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/@password").get(0));
+                c.addCollaborators(collabo);
             }
+            
+            Banker b = new Banker(getContentsListOfSelectItem(scenario, "//company[@name='" + c.getName() + "']/bank/name").get(0));
+            Shareholder sh = new Shareholder(getContentsListOfSelectItem(scenario, "//company[@name='" + c.getName() + "']/shareholder/name").get(0));
+            c.setBanker((Banker) searchElement(b, bankers));
+            c.setShareholder((Shareholder) searchElement(sh, shareholders));
+            this.companies.add(c);
         }
     }
     
@@ -236,12 +149,171 @@ public class Odoosim {
         }
     }
     
+    public void generateBOM() throws Exception {
+        
+        Iterator<Product> iP = products.iterator();
+        while(iP.hasNext()) {
+            Product p = (Product) iP.next();
+            if(p instanceof Good) {
+                Good pGood = (Good) p;
+                List<String> bomXML = getContentsListOfSelectItem(scenario, "//product_sellable[name='" + p.getName() + "']/bom/product");
+                for(int ii=0; ii<bomXML.size(); ii++) {
+                    String qty = getContentsListOfSelectItem(scenario, "//product_sellable[name='" + p.getName() + "']/bom/product[" + (ii + 1) + "]/@quantity").get(0);
+                    String pro = getContentsListOfSelectItem(scenario, "//product_sellable[name='" + p.getName() + "']/bom/product[" + (ii + 1) + "]/name").get(0);
+                    Rawmaterial rwm = new Rawmaterial(pro);
+                    rwm = (Rawmaterial) searchElement(rwm, products);
+                    pGood.addBOM(rwm.getId(), Integer.parseInt(qty));
+                }
+            }
+        }
+    }
+    
     public void getOdooAccess() throws Exception {
         
         //  Récupération du compte d'accès à Odoo.com
-        
         accountOdoo = getDataXML(scenario, "//account").get(0);
         passworOdoo = getDataXML(scenario, "//password").get(0);
     }
-
+    
+    
+    public <T>Object searchElement(Object o, List<T> liste) {
+        
+        int size = liste.size();
+        for(int i=0;i<size;i++) {
+            if(liste.get(i).equals(o))
+                return (Object) liste.get(i);
+        }
+        return null;
+    }
+    
+    public void createMasterDataAccounts(Company c) throws Exception {
+        
+        //  Création des comptes participants
+        Iterator<Collaborator> iCollaborators = c.getCollaborators().iterator();
+        HashMap data = new HashMap();
+        
+        while(iCollaborators.hasNext()) {
+            Collaborator co = iCollaborators.next();
+            data.put("name", co.getName());
+            data.put("login", co.getMail());
+            co.setId(wsapi.addElement(c.getErp(), "res.users", data, c.getUidapiaccess(), passworOdoo));
+        }
+        
+    }
+    
+    public <T>void createMasterDataContacts(Company c, Iterator<T> iT) throws Exception {
+        
+        HashMap data = new HashMap();
+        while(iT.hasNext()) {
+            
+            Object o = iT.next();
+            if(o instanceof Supplier) {
+                Supplier s = (Supplier) o;
+                data.put("name", s.getName());
+                data.put("company_type", "company");
+                data.put("customer", false);
+                data.put("supplier", true);
+                s.setId(wsapi.addElement(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
+            } else if (o instanceof Shareholder) {
+                Shareholder s = (Shareholder) o;
+                data.put("name", s.getName());
+                data.put("company_type", "company");
+                data.put("customer", false);
+                data.put("supplier", false);
+                s.setId(wsapi.addElement(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
+            } else if (o instanceof Banker) {
+                Banker b = (Banker) o;
+                data.put("name", b.getName());
+                data.put("company_type", "company");
+                data.put("customer", false);
+                data.put("supplier", false);
+                b.setId(wsapi.addElement(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
+            }
+        }
+    }
+    
+    public void createMasterDataRawMaterials(Company c) throws Exception {
+        HashMap data = new HashMap();
+        Iterator<Product> iP = products.iterator();
+        while(iP.hasNext()) {
+            Product p = iP.next();
+            if(p instanceof Rawmaterial) {
+                Rawmaterial rm = (Rawmaterial) p;
+                data.put("name", rm.getName());
+                data.put("type", "product");
+                data.put("default_code", rm.getCode());
+                data.put("list_price", 00.00);
+                data.put("standard_price", rm.getPurchasePrice());
+                data.put("sale_ok", false);
+                data.put("purchase_ok", true);
+                data.put("seller_ids", asList(asList(0, false, new HashMap<String, Object>() {
+                    {
+                        put("name", rm.getSupplier().getId());
+                        put("min_qty", 1.00);
+                        put("price", rm.getPurchasePrice());
+                    }
+                })));
+                rm.setId(wsapi.addElement(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
+            }
+        }
+    }
+    
+    public void createMasterDataProduct(Company c) throws Exception {
+        HashMap data = new HashMap();
+        Iterator<Product> iP = products.iterator();
+        while(iP.hasNext()) {
+            Product p = iP.next();
+            if(p instanceof Good) {
+                Good gd = (Good) p;
+                data.put("name", gd.getName());
+                data.put("type", "product");
+                data.put("default_code", gd.getCode());
+                data.put("list_price", gd.getIndicativeSalePrice());
+                data.put("standard_price", gd.getPurchasePrice());
+                data.put("sale_ok", true);
+                data.put("purchase_ok", false);
+                gd.setId(wsapi.addElement(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
+            }
+        }
+    }
+    
+    public void createMasterDataBOM(Company c) throws Exception {
+        
+        HashMap data = new HashMap();
+        HashMap dataBOM;
+        Iterator<Product> iP = products.iterator();
+        
+        while(iP.hasNext()) {
+            Product p = iP.next();
+            if(p instanceof Good) {
+                
+                dataBOM = (HashMap) ((Good) p).getBillOfMaterials();
+                Iterator iBOM = dataBOM.keySet().iterator();
+                List aList = new ArrayList<>();
+                
+                while(iBOM.hasNext()) {
+                   int idProduct = (int) iBOM.next();
+                   int quantity = (int) dataBOM.get(idProduct);
+                   HashMap hhmp = new HashMap<String, Object>() {{put("product_id", idProduct); put("product_qty", quantity);}};
+                   aList.add(asList(0, false, hhmp));
+                }
+                data.put("product_tmpl_id", p.getId());
+                data.put("product_qty", 1.00);
+                data.put("type", "normal");
+                data.put("bom_line_ids", aList);
+                wsapi.addElement(c.getErp(), "mrp.bom", data, c.getUidapiaccess(), passworOdoo);
+            }
+                
+        }
+    }
+    
+    public void tryConnection(Company c) {
+        
+        writeLn(typeOfMessage.INFO, "Connexion de la base de données (" + c.getErp() + ") de l'équipe : " + c.getName());
+        try {
+            c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
+        } catch (Exception e) {
+            writeLn(typeOfMessage.ERROR, e.getMessage());
+        }
+    }
 }

@@ -7,6 +7,9 @@ public abstract class Product {
     private String name;
     private Double purchasePrice;
 
+    public Product (String name) {
+        this.name = name;
+    }
     public Product(String code, String name, Double purchasePrice) {
         this.code = code;
         this.name = name;
