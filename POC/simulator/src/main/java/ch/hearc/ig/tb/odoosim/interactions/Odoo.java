@@ -1,4 +1,4 @@
-package ch.hearc.ig.tb.odoosim.persistence;
+package ch.hearc.ig.tb.odoosim.interactions;
 
 import java.net.URL;
 import static java.util.Arrays.asList;
@@ -29,6 +29,21 @@ public class Odoo {
         return (int) common.execute(configuration, "authenticate", asList(database, account, password, emptyMap()));
     }
 
+    public int exist(String database, String model, int uid, String password, List criteria) {
+        try {
+            setConfiguration(2, database);
+            object.setConfig(configuration);
+            return (int) asList((Object[]) object.execute(
+                    "execute_kw", asList(
+                            database, uid, password,
+                            model, "search",
+                            asList(criteria)))).get(0);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+
     public int addElement(String database, String model, HashMap data, int uid, String password) throws Exception {
         setConfiguration(2, database);
         object.setConfig(configuration);
@@ -44,14 +59,14 @@ public class Odoo {
                 database, uid, password,
                 model, "search_read",
                 asList(asList(asList("name", "=", value))))));
-        if(resultat.size()<1)
+        if (resultat.size() < 1) {
             return 0;
-        else {
+        } else {
             HashMap hsM = (HashMap) resultat.get(0);
             return (int) hsM.get("id");
         }
     }
-    
+
     public int searchAccountByCode(String database, int uid, String password, String model, String value) throws Exception {
         setConfiguration(2, database);
         object.setConfig(configuration);
@@ -59,9 +74,9 @@ public class Odoo {
                 database, uid, password,
                 model, "search_read",
                 asList(asList(asList("code", "=", value))))));
-        if(resultat.size()<1)
+        if (resultat.size() < 1) {
             return 0;
-        else {
+        } else {
             HashMap hsM = (HashMap) resultat.get(0);
             return (int) hsM.get("id");
         }
@@ -83,6 +98,15 @@ public class Odoo {
         )));
         HashMap hsM = (HashMap) resultat.get(0);
         return (int) hsM.get("id");
+    }
+
+    public void workflowProgress(String database, int uid, String password, String model, String nextStep, int idObject) throws Exception {
+        setConfiguration(2, database);
+        object.setConfig(configuration);
+        object.execute(
+                "exec_workflow", asList(
+                        database, uid, password,
+                        model, nextStep, idObject));
     }
 
     private void setConfiguration(int type, String database) throws Exception {

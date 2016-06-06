@@ -1,6 +1,6 @@
 package ch.hearc.ig.tb.odoosim.views;
 
-import ch.hearc.ig.tb.odoosim.persistence.Odoo;
+import ch.hearc.ig.tb.odoosim.interactions.Odoo;
 import ch.hearc.ig.tb.odoosim.services.Odoosim;
 import static ch.hearc.ig.tb.odoosim.services.Odoosim.*;
 import static ch.hearc.ig.tb.odoosim.utils.Utility.*;

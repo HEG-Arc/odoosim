@@ -2,10 +2,10 @@ package ch.hearc.ig.tb.odoosim.business;
 
 public abstract class Product {
     
-    private int id;
-    private String code;
-    private String name;
-    private Double purchasePrice;
+    protected int id;
+    protected String code;
+    protected String name;
+    protected Double purchasePrice;
 
     public Product (String name) {
         this.name = name;

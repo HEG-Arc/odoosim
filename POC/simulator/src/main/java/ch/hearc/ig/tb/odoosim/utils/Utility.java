@@ -92,4 +92,9 @@ public class Utility {
             return format;
         }
     }
+    
+    public static <T>Iterator getIterator(List<T> list) {
+        Iterator i = list.iterator();
+        return i;
+    }
 }

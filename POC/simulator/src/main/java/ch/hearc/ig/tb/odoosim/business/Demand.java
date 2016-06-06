@@ -4,34 +4,40 @@ import java.util.*;
 
 public class Demand {
 
-	private Product product;
-	private int id;
-	private int day;
-	private int quantity;
-	private Collection<Exchange> exchanges;
+    private Product product;
+    private int id;
+    private int day;
+    private int quantity;
+    private Exchange transaction;
 
-	public int getId() {
-		return this.id;
-	}
+    public Demand(Product product, int day, int quantity) {
+        this.product = product;
+        this.day = day;
+        this.quantity = quantity;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return this.id;
+    }
 
-	public int getDay() {
-		return this.day;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setDay(int day) {
-		this.day = day;
-	}
+    public int getDay() {
+        return this.day;
+    }
 
-	public int getQuantity() {
-		return this.quantity;
-	}
+    public void setDay(int day) {
+        this.day = day;
+    }
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
+    public int getQuantity() {
+        return this.quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 
 }

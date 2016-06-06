@@ -4,24 +4,33 @@ import java.util.*;
 
 public class Consumer {
 
-	private Collection<Demand> demands;
-	private int id;
-	private String code;
+    private int id;
+    private String code;
+    private Collection<Demand> demands;
 
-	public int getId() {
-		return this.id;
-	}
+    public Consumer(String code) {
+        this.code = code;
+        demands = new ArrayList<>();
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return this.id;
+    }
 
-	public String getCode() {
-		return this.code;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public String getCode() {
+        return this.code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+    
+    public void addDemand(Demand d) {
+        this.demands.add(d);
+    }
 
 }

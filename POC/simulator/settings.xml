@@ -7,7 +7,7 @@
     </odoo>
     <companies>
         <company name="Team_A">
-            <erp database="edu-odoosim-template-000"/>
+            <erp database="edu-odoosim-igpta6616"/>
             <players>
                 <player login="a1@mailinator.com" password="Welcome">Anthony Tomat</player>
                 <player login="a2@mailinator.com" password="Welcome">Marcel Grosjean</player>
@@ -91,6 +91,8 @@
                         <name>Eau</name>
                     </product>
                 </bom>
+                <!-- Correspond au entrée de stock tous les jours (automatiquement)-->
+                <stockentry>50000</stockentry>
             </product_sellable>
             <product_sellable type="product" default_code="BW01B" list_price="2.50" standard_price="2.50">
                 <name>Lager Beer Bio</name>
@@ -105,47 +107,20 @@
                         <name>Eau</name>
                     </product>
                 </bom>
+                <process automatic="true">50000</process>
             </product_sellable>
         </products>
-        <markets volumDemandDay="10000">
-            <market area="est" part="30.00">
-                <customers>
-                    <type income="high" elasticty="5.00">
-                        <customers part="10.00"/>
-                    </type>
-                    <type income="middle" elasticty="9.00">
-                        <customers part="60.00"/>
-                    </type>
-                    <type income="low" elasticty="15.00">
-                        <customers part="30.00"/>
-                    </type>
-                </customers>
+        <markets baseVolumDemandDay="10000">
+            <!-- La somme des attributs "part" de l'élément "market" doit valoir "100" (%) qui représente
+            les parts de marché pour une région donnée-->
+            <market part="30.00" elasticity="12.00" demandPartByCustomers="5">
+                <name>Suisse de l'Est</name>
             </market>
-            <market area="central" part="20.00">
-                <customers>
-                    <type income="high" elasticty="5.00">
-                        <customers part="10.00"/>
-                    </type>
-                    <type income="middle" elasticty="9.00">
-                        <customers part="60.00"/>
-                    </type>
-                    <type income="low" elasticty="15.00">
-                        <customers part="30.00"/>
-                    </type>
-                </customers>
+            <market part="20.00" elasticity="9.5" demandPartByCustomers="10">
+                <name>Suisse centrale</name>
             </market>
-            <market area="ouest" part="50.00">
-                <customers volumPerDay="10000">
-                    <type income="high" elasticty="5.00">
-                        <customers part="10.00"/>
-                    </type>
-                    <type income="middle" elasticty="9.00">
-                        <customers part="60.00"/>
-                    </type>
-                    <type income="low" elasticty="15.00">
-                        <customers part="30.00"/>
-                    </type>
-                </customers>
+            <market part="50.00" elasticity="6.9" demandPartByCustomers="9">
+                <name>Suisse de l'Ouest</name>
             </market>
         </markets>
         <accounting>
