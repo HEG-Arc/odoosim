@@ -174,13 +174,6 @@ public class Odoosim {
                         getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/name").get(0));
                 collabo.setMail(getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/@login").get(0));
                 c.addCollaborators(collabo);
-//                List<String> roles = getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/roles/role");
-//                for (int iii=0; iii<roles.size();iii++) {
-//                    List<Collaborator> allCollaborators = (List<Collaborator>) c.getCollaborators();
-//                    allCollaborators.get(ii).addFunction(new Endossement(
-//                            getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/roles/role[" + (iii + 1) + "]/name").get(0), 
-//                                getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player[" + (ii + 1) + "]/roles/role[" + (iii + 1) + "]/value").get(0)));
-//                }
             }
 
             Banker b = new Banker(getDataXML(scenario, "//company[@name='" + c.getName() + "']/bank/name").get(0));
@@ -292,31 +285,14 @@ public class Odoosim {
 
         while (iCollaborators.hasNext()) {
             Collaborator co = iCollaborators.next();
-            int exist = wsapi.exist(c.getErp(), "res.users", c.getUidapiaccess(), passworOdoo, asList(asList("login", "=", co.getMail()), asList("name", "=", co.getName())));
+            int exist = wsapi.getID(c.getErp(), "res.users", c.getUidapiaccess(), passworOdoo, asList(asList("login", "=", co.getMail()), asList("name", "=", co.getName())));
             if (exist < 0) {
                 data.put("name", co.getName());
                 data.put("login", co.getMail());
-                co.setId(wsapi.addElement(c.getErp(), "res.users", data, c.getUidapiaccess(), passworOdoo));
+                co.setId(wsapi.insert(c.getErp(), "res.users", data, c.getUidapiaccess(), passworOdoo));
             } else {
                 co.setId(exist);
             }
-
-            /* N'est pas fonctionnel car tous les droits sur toutes les applications sont présent par défaut.
-            Cela veut dire qu'il faudrait trouver dans toutes les applications disponibles où l'utilisateur est référentier
-            et faire autant de requête de modification pour le supprimer... Puis attribuer le rôle défini dans le XML.
-            à voir s'il sera possible de gérer cette partie dans la version POC. Sinon, les participants auront les droits sur
-            tous les modules...
-            //  Attribution des droits spécifiques
-            List<Endossement> endossements = (List<Endossement>) co.getFunction();
-            for(int i=0; i<endossements.size(); i++) {
-                int catID = wsapi.exist(c.getErp(), "ir.module.category", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", endossements.get(i).getDepartment())));
-                String role = endossements.get(i).getRole();
-                int group = wsapi.exist(c.getErp(), "res.groups", c.getUidapiaccess(), passworOdoo, asList(asList("category_id", "=", catID), asList("name", "=", role)));
-                data.clear();
-                data.put("users", co.getId());
-                wsapi.update(c.getErp(), "res.groups", c.getUidapiaccess(), passworOdoo, group, data);
-            }
-             */
         }
 
     }
@@ -329,40 +305,40 @@ public class Odoosim {
             Object o = iT.next();
             if (o instanceof Supplier) {
                 Supplier s = (Supplier) o;
-                int exist = wsapi.exist(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("customer", "=", false),
+                int exist = wsapi.getID(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("customer", "=", false),
                         asList("supplier", "=", true), asList("name", "=", s.getName()), asList("company_type", "=", "company")));
                 if (exist < 0) {
                     data.put("name", s.getName());
                     data.put("company_type", "company");
                     data.put("customer", false);
                     data.put("supplier", true);
-                    s.setId(wsapi.addElement(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
+                    s.setId(wsapi.insert(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
                 } else {
                     s.setId(exist);
                 }
             } else if (o instanceof Shareholder) {
                 Shareholder s = (Shareholder) o;
-                int exist = wsapi.exist(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("customer", "=", false),
+                int exist = wsapi.getID(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("customer", "=", false),
                         asList("supplier", "=", false), asList("name", "=", s.getName()), asList("company_type", "=", "company")));
                 if (exist < 0) {
                     data.put("name", s.getName());
                     data.put("company_type", "company");
                     data.put("customer", false);
                     data.put("supplier", false);
-                    s.setId(wsapi.addElement(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
+                    s.setId(wsapi.insert(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
                 } else {
                     s.setId(exist);
                 }
             } else if (o instanceof Banker) {
                 Banker b = (Banker) o;
-                int exist = wsapi.exist(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("customer", "=", false),
+                int exist = wsapi.getID(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("customer", "=", false),
                         asList("supplier", "=", false), asList("name", "=", b.getName()), asList("company_type", "=", "company")));
                 if (exist < 0) {
                     data.put("name", b.getName());
                     data.put("company_type", "company");
                     data.put("customer", false);
                     data.put("supplier", false);
-                    b.setId(wsapi.addElement(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
+                    b.setId(wsapi.insert(c.getErp(), "res.partner", data, c.getUidapiaccess(), passworOdoo));
                 } else {
                     b.setId(exist);
                 }
@@ -377,7 +353,7 @@ public class Odoosim {
             Product p = iP.next();
             if (p instanceof Rawmaterial) {
                 Rawmaterial rm = (Rawmaterial) p;
-                int exist = wsapi.exist(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", rm.getName()),
+                int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", rm.getName()),
                         asList("type", "=", "product")));
                 if (exist < 0) {
                     data.put("name", rm.getName());
@@ -394,7 +370,7 @@ public class Odoosim {
                             put("price", rm.getPurchasePrice());
                         }
                     })));
-                    rm.setId(wsapi.addElement(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
+                    rm.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
                 } else {
                     rm.setId(exist);
                 }
@@ -409,7 +385,7 @@ public class Odoosim {
             Product p = iP.next();
             if (p instanceof Good) {
                 Good gd = (Good) p;
-                int exist = wsapi.exist(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", gd.getName()),
+                int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", gd.getName()),
                         asList("type", "=", "product"), asList("default_code", "=", gd.getCode())));
                 if (exist < 0) {
                     data.put("name", gd.getName());
@@ -419,7 +395,7 @@ public class Odoosim {
                     data.put("standard_price", gd.getPurchasePrice());
                     data.put("sale_ok", true);
                     data.put("purchase_ok", false);
-                    gd.setId(wsapi.addElement(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
+                    gd.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
                 } else {
                     gd.setId(exist);
                 }
@@ -436,7 +412,7 @@ public class Odoosim {
         while (iP.hasNext()) {
             Product p = iP.next();
             if (p instanceof Good) {
-                int exist = wsapi.exist(c.getErp(), "mrp.bom", c.getUidapiaccess(), passworOdoo, asList(asList("product_tmpl_id", "=", p.getName())));
+                int exist = wsapi.getID(c.getErp(), "mrp.bom", c.getUidapiaccess(), passworOdoo, asList(asList("product_tmpl_id", "=", p.getName())));
                 if (exist < 0) {
                     dataBOM = (HashMap) ((Good) p).getBillOfMaterials();
                     Iterator iBOM = dataBOM.keySet().iterator();
@@ -457,10 +433,9 @@ public class Odoosim {
                     data.put("product_qty", 1.00);
                     data.put("type", "normal");
                     data.put("bom_line_ids", aList);
-                    wsapi.addElement(c.getErp(), "mrp.bom", data, c.getUidapiaccess(), passworOdoo);
+                    wsapi.insert(c.getErp(), "mrp.bom", data, c.getUidapiaccess(), passworOdoo);
                 }
             }
-
         }
     }
 
@@ -469,21 +444,16 @@ public class Odoosim {
         List<String> journals = getDataXML(scenario, "//accounting/journalentry");
         for (int i = 0; i < journals.size(); i++) {
             String name = getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/name").get(0);
-            //data.put("journal_id", wsapi.searchID(c.getErp(), c.getUidapiaccess(), passworOdoo, "account.journal", name));
-            data.put("journal_id", wsapi.exist(c.getErp(), "account.journal", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", name))));
+            data.put("journal_id", wsapi.getID(c.getErp(), "account.journal", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", name))));
             List<String> entries = getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item");
             List aList = new ArrayList<>();
             int exist = 0;
             for (int ii = 0; ii < entries.size(); ii++) {
                 String erp = c.getErp();
                 int uid = c.getUidapiaccess();
-//                int acc_id = wsapi.searchAccountByCode(c.getErp(), c.getUidapiaccess(), passworOdoo, "account.account",
-//                        getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item[" + (ii + 1) + "]/account/number").get(0));
-                int acc_id = wsapi.exist(c.getErp(), "account.account", c.getUidapiaccess(), passworOdoo, asList(asList("code", "=", 
+                int acc_id = wsapi.getID(c.getErp(), "account.account", c.getUidapiaccess(), passworOdoo, asList(asList("code", "=", 
                         getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item[" + (ii + 1) + "]/account/number").get(0))));
-                //int par_id = wsapi.searchID(c.getErp(), c.getUidapiaccess(), passworOdoo, "res.partner",
-                        //getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item[" + (ii + 1) + "]/partner/name").get(0));
-                int par_id = wsapi.exist(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", 
+                int par_id = wsapi.getID(c.getErp(), "res.partner", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", 
                         getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item[" + (ii + 1) + "]/partner/name").get(0))));
                 String label = getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item[" + (ii + 1) + "]/label").get(0);
                 Double debit = Double.parseDouble(getDataXML(scenario, "//accounting/journalentry[" + (i + 1) + "]/items/item[" + (ii + 1) + "]/amountdebit").get(0));
@@ -495,14 +465,14 @@ public class Odoosim {
                 hsmap.put("debit", debit);
                 hsmap.put("credit", credit);
                 aList.add(asList(0, false, hsmap));
-                exist = wsapi.exist(erp, "account.move.line", uid, passworOdoo,
+                exist = wsapi.getID(erp, "account.move.line", uid, passworOdoo,
                         asList(asList("journal_id", "=", data.get("journal_id")), asList("partner_id", "=", par_id), asList("account_id", "=", acc_id),
                                 asList("debit", "=", debit), asList("credit", "=", credit)));
             }
             data.put("line_ids", aList);
             data.put("state", "posted");
             if (exist < 0) {
-                wsapi.addElement(c.getErp(), "account.move", data, c.getUidapiaccess(), passworOdoo);
+                wsapi.insert(c.getErp(), "account.move", data, c.getUidapiaccess(), passworOdoo);
             }
         }
     }
@@ -532,11 +502,9 @@ public class Odoosim {
                     data.put("product_id", pId);
                     data.put("qty", quantity);
                     data.put("name", "Inventaire automatique pour " + products.get(i).getName());
-//                    data.put("location_id", String.valueOf(wsapi.searchID(c.getErp(), c.getUidapiaccess(), passworOdoo, "stock.location",
-//                            getDataXML(scenario, "//defaultstock/name").get(0))));
-                    data.put("location_id", wsapi.exist(c.getErp(), "stock.location", c.getUidapiaccess(), passworOdoo, 
+                    data.put("location_id", wsapi.getID(c.getErp(), "stock.location", c.getUidapiaccess(), passworOdoo, 
                             asList(asList("name", "=", getDataXML(scenario, "//defaultstock/name").get(0)))));
-                    wsapi.addElement(c.getErp(), "stock.quant", data, c.getUidapiaccess(), passworOdoo);
+                    wsapi.insert(c.getErp(), "stock.quant", data, c.getUidapiaccess(), passworOdoo);
                 }
             }
         }

@@ -2,7 +2,6 @@ package ch.hearc.ig.tb.odoosim.interactions;
 
 import java.net.URL;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +10,8 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class Odoo {
-    /* Les méthodes "exist", "getData", "searchID", "searchAccountByCode" font la même
-    chose mais il faut essayer de les remplacer par la méthode getData ou exist qui sont plus optimisée!
+    /* Les méthodes "getID", "getData", "searchID", "searchAccountByCode" font la même
+    chose mais il faut essayer de les remplacer par la méthode getData ou getID qui sont plus optimisée!
     */
     private String protocol;
     private String dns;
@@ -49,7 +48,7 @@ public class Odoo {
 
     /**
      * Cherche dans Odoo l'existance ou non d'un enregistrement selon des
-     * critères de recherche
+     * critères de recherche et retourne l'ID ou -1 si rien n'est existant
      *
      * @param database L'instance requêtée
      * @param model Le modèle i.e. l'objet Odoo (Exemple : res.partner)
@@ -58,7 +57,7 @@ public class Odoo {
      * @param criteria Une liste de critère pour affiner la recherche
      * @return une valeur supérieur à 0 si un élément est trouvé sinon -1
      */
-    public int exist(String database, String model, int uid, String password, List criteria) {
+    public int getID(String database, String model, int uid, String password, List criteria) {
         try {
             setConfiguration(2, database);
             object.setConfig(configuration);
@@ -139,56 +138,13 @@ public class Odoo {
      * @return
      * @throws Exception
      */
-    public int addElement(String database, String model, HashMap data, int uid, String password) throws Exception {
+    public int insert(String database, String model, HashMap data, int uid, String password) throws Exception {
         setConfiguration(2, database);
         object.setConfig(configuration);
         return (int) object.execute("execute_kw",
                 asList(database, uid, password, model, "create",
                         asList(data)));
     }
-
-    /**
-     * Recherche d'un enregistrement dans Odoo par son nom. Cela fonctionne car
-     * les noms provenants du fichier de configuration son unique. Cependant
-     * attention car rien ne le garantie
-     *
-     * @param database L'instance requêtée
-     * @param uid L'uid permettant de s'authentifier
-     * @param password Le mot de passe du compte d'administration de l'instance
-     * @param model Le modèle i.e. l'objet Odoo (Exemple : res.partner)
-     * @param value Valeur du champs "name"
-     * @return
-     * @throws Exception
-     */
-    /*public int searchID(String database, int uid, String password, String model, String value) throws Exception {
-        setConfiguration(2, database);
-        object.setConfig(configuration);
-        List resultat = asList((Object[]) object.execute("execute_kw", asList(
-                database, uid, password,
-                model, "search_read",
-                asList(asList(asList("name", "=", value))))));
-        if (resultat.size() < 1) {
-            return 0;
-        } else {
-            HashMap hsM = (HashMap) resultat.get(0);
-            return (int) hsM.get("id");
-        }
-    }*/
-
-    /*public int searchAccountByCode(String database, int uid, String password, String model, String value) throws Exception {
-        setConfiguration(2, database);
-        object.setConfig(configuration);
-        List resultat = asList((Object[]) object.execute("execute_kw", asList(
-                database, uid, password,
-                model, "search_read",
-                asList(asList(asList("code", "=", value))))));
-        if (resultat.size() < 1) {
-            return 0;
-        } else {
-            HashMap hsM = (HashMap) resultat.get(0);
-            return (int) hsM.get("id");
-        }
-    }*/
 
     /**
      *
