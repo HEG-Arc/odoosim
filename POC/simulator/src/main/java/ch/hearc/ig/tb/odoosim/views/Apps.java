@@ -1,17 +1,7 @@
 package ch.hearc.ig.tb.odoosim.views;
 
-import ch.hearc.ig.tb.odoosim.interactions.Odoo;
 import ch.hearc.ig.tb.odoosim.services.Odoosim;
-import static ch.hearc.ig.tb.odoosim.services.Odoosim.*;
 import static ch.hearc.ig.tb.odoosim.utils.Utility.*;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
 
 public class Apps {
 

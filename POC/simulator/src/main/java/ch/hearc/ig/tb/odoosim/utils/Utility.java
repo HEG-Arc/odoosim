@@ -16,16 +16,16 @@ import org.w3c.dom.NodeList;
 
 public class Utility {
     
-    public static List<String> getDataXML(org.w3c.dom.Document xmlDocument, String request) throws Exception {
+    /*public static List<String> getDataXML(org.w3c.dom.Document xmlDocument, String request) throws Exception {
         List<String> result = new ArrayList();
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile(request).evaluate(xmlDocument, XPathConstants.NODESET);
         Node node = (Node) nodeList.item(0);
         if (node != null && !node.getTextContent().isEmpty()) result = Arrays.asList(node.getTextContent().split("::"));
         return result;
-    }
+    }*/
     
-    public static List<String> getContentsListOfSelectItem(org.w3c.dom.Document xmlDocument, String request) throws Exception {
+    public static List<String> getDataXML(org.w3c.dom.Document xmlDocument, String request) throws Exception {
         List<String> result = new ArrayList();
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile(request).evaluate(xmlDocument, XPathConstants.NODESET);

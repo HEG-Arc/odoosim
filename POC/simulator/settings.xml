@@ -4,14 +4,23 @@
         <account>anthony.tomat@he-arc.ch</account>
         <password>Welcome</password>
         <dbtemplate>edu-odoosim-template</dbtemplate>
+        <defaultstock>
+            <name>Stock</name>
+        </defaultstock>
     </odoo>
     <companies>
         <company name="Team_A">
-            <erp database="edu-odoosim-igpta6616"/>
+            <erp database="edu-odoosim-at1-7616"/>
             <players>
-                <player login="a1@mailinator.com" password="Welcome">Anthony Tomat</player>
-                <player login="a2@mailinator.com" password="Welcome">Marcel Grosjean</player>
-                <player login="a3@mailinator.com" password="Welcome">Juan Fernandez</player>
+                <player login="anthony.tomat@gmail.com">
+                    <name>Anthony Tomat</name>
+                    <roles>
+                        <role>
+                            <name>Sales</name>
+                            <value>Manager</value>
+                        </role>
+                    </roles>
+                </player>
             </players>
             <bank>
                 <name>VUBS SA</name>
@@ -20,11 +29,18 @@
                 <name>Breweries Holding Corp.</name>
             </shareholder>
         </company>
-        <!--company name="Team_B">
-            <erp database="edu-odoosim-igptb"/>
+        <company name="Team_B">
+            <erp database="edu-odoosim-at2-7616"/>
             <players>
-                <player login="b1@mailinator.com" password="Welcome">François Gatherat</player>
-                <player login="b2@mailinator.com" password="Welcome">Julien Moser</player>
+                <player login="bumplitz@mailinator.com">
+                    <name>Anthony Tomat</name>
+                    <roles>
+                        <role>
+                            <name>Sales</name>
+                            <value>Manager</value>
+                        </role>
+                    </roles>
+                </player>
             </players>
             <bank>
                 <name>VUBS SA</name>
@@ -34,9 +50,17 @@
             </shareholder>
         </company>
         <company name="Team_C">
-            <erp database="edu-odoosim-igptc"/>
+                <erp database="edu-odoosim-at3-7616"/>
             <players>
-                <player login="c1@mailinator.com" password="Welcome">Boris Fritscher</player>
+                <player login="zizitop@mailinator.com">
+                    <name>Anthony Tomat</name>
+                    <roles>
+                        <role>
+                            <name>Sales</name>
+                            <value>Manager</value>
+                        </role>
+                    </roles>
+                </player>
             </players>
             <bank>
                 <name>VUBS SA</name>
@@ -44,7 +68,7 @@
             <shareholder>
                 <name>Breweries Holding Corp.</name>
             </shareholder>
-        </company-->
+        </company>
     </companies>
     <scenario>
         <rounds>
@@ -52,75 +76,420 @@
             <time>780</time>
         </rounds>
         <contacts>
-            <contact company_type="company" customer="false" supplier="true" type="supplier">Mr. BlaBla</contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier">Maltonne SA</contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier">Ourseau SA</contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier">Monsieur Ture</contact>
             <contact company_type="company" customer="false" supplier="false" type="banker">VUBS SA</contact>
             <contact company_type="company" customer="false" supplier="false" type="shareholder">Breweries Holding Corp.</contact>
         </contacts>
         <products>
-            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="15.00">
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="00.0015">
+                <name>Eau traitée</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Ourseau SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="18.00">
                 <name>Houblon</name>
                 <startQuantity>1000</startQuantity>
                 <supplier>
-                    <name>Mr. BlaBla</name>
+                    <name>Maltonne SA</name>
                 </supplier>
             </product_purchasable>
-            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="15.00">
-                <name>Orge</name>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="27.00">
+                <name>Houblon BIO</name>
                 <startQuantity>1000</startQuantity>
                 <supplier>
-                    <name>Mr. BlaBla</name>
+                    <name>Maltonne SA</name>
                 </supplier>
             </product_purchasable>
-            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="15.00">
-                <name>Eau</name>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="0.60">
+                <name>Malt d'orge</name>
                 <startQuantity>1000</startQuantity>
                 <supplier>
-                    <name>Mr. BlaBla</name>
+                    <name>Maltonne SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="0.75">
+                <name>Malt d'orge BIO</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Maltonne SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="0.45">
+                <name>Malt de fromant</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Maltonne SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="250.00">
+                <name>Levure à bière</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Maltonne SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="275.00">
+                <name>Levure à bière BIO</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Maltonne SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="10.00">
+                <name>Miel</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Monsieur Ture</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="8.00">
+                <name>Bouquet d'épices</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Monsieur Ture</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="0.01">
+                <name>Récipient format 50cl cannette d'aluminium</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Maltonne SA</name>
+                </supplier>
+            </product_purchasable>
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="0.05">
+                <name>Récipient format 25cl bouteille en verre foncé</name>
+                <startQuantity>1000</startQuantity>
+                <supplier>
+                    <name>Maltonne SA</name>
                 </supplier>
             </product_purchasable>
             <product_sellable type="product" default_code="BW01A" list_price="2.00" standard_price="2.00">
-                <name>Lager Beer</name>
+                <name>Lager Beer 0.25</name>
+                <!-- Pour définir les quantités de chacune des matières premières, il faut se référer au document
+                de présentation du scénario et faire le rapport des 40 hectolitre = 400000 cl => 16'000 unité de 25
+                et 8'000 unité de 50cl (formats)-->
+                <!-- 0.25 d'eau / 0.0325 de malt d'orge / 0.0005 de houblon / 0.0015 de levure / 1 bouteille -->
                 <bom>
-                    <product quantity="10">
+                    <product quantity="0.25">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.0005">
                         <name>Houblon</name>
                     </product>
-                    <product quantity="50">
-                        <name>Orge</name>
+                    <product quantity="0.0325">
+                        <name>Malt d'orge</name>
                     </product>
-                    <product quantity="100">
-                        <name>Eau</name>
+                    <product quantity="0.0015">
+                        <name>Levure à bière</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 25cl bouteille en verre foncé</name>
                     </product>
                 </bom>
                 <!-- Correspond au entrée de stock tous les jours (automatiquement)-->
                 <stockentry>50000</stockentry>
             </product_sellable>
-            <product_sellable type="product" default_code="BW01B" list_price="2.50" standard_price="2.50">
-                <name>Lager Beer Bio</name>
+            <product_sellable type="product" default_code="BW01B" list_price="2.00" standard_price="2.00">
+                <name>Lager Beer 0.50</name>
                 <bom>
-                    <product quantity="1">
+                    <product quantity="0.50">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.001">
                         <name>Houblon</name>
                     </product>
-                    <product quantity="5">
-                        <name>Orge</name>
+                    <product quantity="0.065">
+                        <name>Malt d'orge</name>
+                    </product>
+                    <product quantity="0.003">
+                        <name>Levure à bière</name>
                     </product>
                     <product quantity="1">
-                        <name>Eau</name>
+                        <name>Récipient format 50cl cannette d'aluminium</name>
                     </product>
                 </bom>
-                <process automatic="true">50000</process>
+                <!-- Correspond au entrée de stock tous les jours (automatiquement)-->
+                <stockentry>50000</stockentry>
+            </product_sellable>
+            <product_sellable type="product" default_code="BW02A" list_price="2.00" standard_price="2.00">
+                <name>Honing Beer 0.25</name>
+                <bom>
+                    <product quantity="0.25">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.0005">
+                        <name>Houblon</name>
+                    </product>
+                    <product quantity="0.0325">
+                        <name>Malt de fromant</name>
+                    </product>
+                    <product quantity="0.0015">
+                        <name>Levure à bière</name>
+                    </product>
+                    <product quantity="0.00625">
+                        <name>Miel</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 25cl bouteille en verre foncé</name>
+                    </product>
+                </bom>
+                <!-- Correspond au entrée de stock tous les jours (automatiquement)-->
+                <stockentry>50000</stockentry>
+            </product_sellable>
+            <product_sellable type="product" default_code="BW02B" list_price="2.00" standard_price="2.00">
+                <name>Honing Beer 0.50</name>
+                <bom>
+                    <product quantity="0.50">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.001">
+                        <name>Houblon</name>
+                    </product>
+                    <product quantity="0.065">
+                        <name>Malt de fromant</name>
+                    </product>
+                    <product quantity="0.003">
+                        <name>Levure à bière</name>
+                    </product>
+                    <product quantity="0.0125">
+                        <name>Miel</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 50cl cannette d'aluminium</name>
+                    </product>
+                </bom>
+                <!-- Correspond au entrée de stock tous les jours (automatiquement)-->
+                <stockentry>50000</stockentry>
+            </product_sellable>
+            <product_sellable type="product" default_code="BW03A" list_price="2.00" standard_price="2.00">
+                <name>Lager Beer BIO 0.25</name>
+                <bom>
+                    <product quantity="0.25">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.0005">
+                        <name>Houblon BIO</name>
+                    </product>
+                    <product quantity="0.0325">
+                        <name>Malt d'orge BIO</name>
+                    </product>
+                    <product quantity="0.0015">
+                        <name>Levure à bière BIO</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 25cl bouteille en verre foncé</name>
+                    </product>
+                </bom>
+                <stockentry>50000</stockentry>
+            </product_sellable>
+            <product_sellable type="product" default_code="BW03B" list_price="2.00" standard_price="2.00">
+                <name>Lager Beer BIO 0.50</name>
+                <bom>
+                    <product quantity="0.5">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.001">
+                        <name>Houblon BIO</name>
+                    </product>
+                    <product quantity="0.065">
+                        <name>Malt d'orge BIO</name>
+                    </product>
+                    <product quantity="0.003">
+                        <name>Levure à bière BIO</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 50cl cannette d'aluminium</name>
+                    </product>
+                </bom>
+                <stockentry>50000</stockentry>
+            </product_sellable>
+            <product_sellable type="product" default_code="BW04A" list_price="2.00" standard_price="2.00">
+                <name>Spice Beer 0.25</name>
+                <bom>
+                    <product quantity="0.25">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.0005">
+                        <name>Houblon</name>
+                    </product>
+                    <product quantity="0.0325">
+                        <name>Malt d'orge</name>
+                    </product>
+                    <product quantity="0.0015">
+                        <name>Levure à bière</name>
+                    </product>
+                    <product quantity="0.125">
+                        <name>Bouquet d'épices</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 25cl bouteille en verre foncé</name>
+                    </product>
+                </bom>
+                <stockentry>50000</stockentry>
+            </product_sellable>
+            <product_sellable type="product" default_code="BW04B" list_price="2.00" standard_price="2.00">
+                <name>Spice Beer 0.50</name>
+                <bom>
+                    <product quantity="0.5">
+                        <name>Eau traitée</name>
+                    </product>
+                    <product quantity="0.001">
+                        <name>Houblon</name>
+                    </product>
+                    <product quantity="0.065">
+                        <name>Malt d'orge</name>
+                    </product>
+                    <product quantity="0.003">
+                        <name>Levure à bière</name>
+                    </product>
+                    <product quantity="0.25">
+                        <name>Bouquet d'épices</name>
+                    </product>
+                    <product quantity="1">
+                        <name>Récipient format 50cl cannette d'aluminium</name>
+                    </product>
+                </bom>
+                <stockentry>50000</stockentry>
             </product_sellable>
         </products>
         <markets baseVolumDemandDay="10000">
             <!-- La somme des attributs "part" de l'élément "market" doit valoir "100" (%) qui représente
             les parts de marché pour une région donnée-->
-            <market part="30.00" elasticity="12.00" demandPartByCustomers="5">
-                <name>Suisse de l'Est</name>
+            <market part="30.00">
+                <name>Suisse Est</name>
+                <retailers>
+                    <retailer type="groceries" number="8" payMin="5" payMax="10" part="20.00" elasticity="8.00">
+                        <name>Détaillant N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW02A</code>
+                            </product>
+                            <product>
+                                <code>BW03A</code>
+                            </product>
+                            <product>
+                                <code>BW04A</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                    <retailer type="hypermarket" number="15" payMin="15" payMax="15" part="55.00" elasticity="4.00">
+                        <name>Supermarché N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW01B</code>
+                            </product>
+                            <product>
+                                <code>BW02B</code>
+                            </product>
+                            <product>
+                                <code>BW03B</code>
+                            </product>
+                            <product>
+                                <code>BW04B</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                    <retailer type="other" number="27" payMin="8" payMax="12" part="25.00" elasticity="12.00">
+                        <name>Supermarché N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW01A</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                </retailers>       
             </market>
             <market part="20.00" elasticity="9.5" demandPartByCustomers="10">
                 <name>Suisse centrale</name>
+                <retailers>
+                    <retailer type="groceries" number="12" payMin="5" payMax="10" part="20.00" elasticity="8.00">
+                        <name>Détaillant N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW02A</code>
+                            </product>
+                            <product>
+                                <code>BW03A</code>
+                            </product>
+                            <product>
+                                <code>BW04A</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                    <retailer type="hypermarket" number="17" payMin="15" payMax="15" part="55.00" elasticity="4.00">
+                        <name>Supermarché N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW01B</code>
+                            </product>
+                            <product>
+                                <code>BW02B</code>
+                            </product>
+                            <product>
+                                <code>BW03B</code>
+                            </product>
+                            <product>
+                                <code>BW04B</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                    <retailer type="other" number="58" payMin="8" payMax="12" part="25.00" elasticity="12.00">
+                        <name>Supermarché N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW01A</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                </retailers>
             </market>
             <market part="50.00" elasticity="6.9" demandPartByCustomers="9">
-                <name>Suisse de l'Ouest</name>
+                <name>Suisse Ouest</name>
+                <retailers>
+                    <retailer type="groceries" number="23" payMin="5" payMax="10" part="20.00" elasticity="8.00">
+                        <name>Détaillant N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW02A</code>
+                            </product>
+                            <product>
+                                <code>BW03A</code>
+                            </product>
+                            <product>
+                                <code>BW04A</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                    <retailer type="hypermarket" number="11" payMin="15" payMax="15" part="55.00" elasticity="4.00">
+                        <name>Supermarché N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW01B</code>
+                            </product>
+                            <product>
+                                <code>BW02B</code>
+                            </product>
+                            <product>
+                                <code>BW03B</code>
+                            </product>
+                            <product>
+                                <code>BW04B</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                    <retailer type="other" number="49" payMin="8" payMax="12" part="25.00" elasticity="12.00">
+                        <name>Supermarché N°</name>
+                        <preferences>
+                            <product>
+                                <code>BW01A</code>
+                            </product>
+                        </preferences>
+                    </retailer>
+                </retailers>
             </market>
         </markets>
         <accounting>
@@ -202,4 +571,9 @@
             </journalentry>
         </accounting>
     </scenario>
+    <settings>
+        <rules>
+            <autoinventorygoods activ="true" quantityPerDay="1000"/>
+        </rules>
+    </settings>
 </odoosim>

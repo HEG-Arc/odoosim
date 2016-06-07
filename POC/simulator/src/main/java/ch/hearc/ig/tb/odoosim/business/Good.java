@@ -20,7 +20,7 @@ public class Good extends Product {
     private Collection<Offer> vendors;
     private Double indicativeSalePrice;
     //  Key = id Raw Material, Value = quantity of RM
-    private Map<Integer, Integer> billOfMaterials;
+    private Map<Integer, Double> billOfMaterials;
     
     public Good(String name) {
         super(name);
@@ -57,7 +57,7 @@ public class Good extends Product {
         this.billOfMaterials = billOfMaterials;
     }
     
-    public void addBOM(int idProduct, int quantity) {
+    public void addBOM(int idProduct, Double quantity) {
         this.billOfMaterials.put(idProduct, quantity);
     }
     
@@ -74,7 +74,10 @@ public class Good extends Product {
             return false;
         
         Good gd = (Good) good;
-        return Objects.equals(this.getName(), gd.getName());
+        if((Objects.equals(this.getName(), gd.getName())) || (Objects.equals(this.getCode(), gd.getCode())))
+            return true;
+        else
+            return false;
     }
     
 }

@@ -4,50 +4,43 @@ import java.util.*;
 
 public class Collaborator {
 
-	private Company company;
-	private int id;
-	private String name;
-	private String mail;
-	private String password;
+    private Company company;
+    private int id;
+    private String name;
+    private String mail;
+    private Collection<Endossement> functions;
 
-        public Collaborator(String name) {
-            this.company = null;
-            this.id = 0;
-            this.name = name;
-            this.mail = "";
-            this.password = "";
-        }
-	public int getId() {
-		return this.id;
-	}
+    public Collaborator(String name) {
+        this.company = null;
+        this.id = 0;
+        this.name = name;
+        this.mail = "";
+        this.functions = new ArrayList<>();
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return this.id;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public String getMail() {
-		return this.mail;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setMail(String mail) {
-		this.mail = mail;
-	}
+    public String getMail() {
+        return this.mail;
+    }
 
-	public String getPassword() {
-		return this.password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
 
     public Company getCompany() {
         return company;
@@ -56,7 +49,17 @@ public class Collaborator {
     public void setCompany(Company company) {
         this.company = company;
     }
-        
-        
 
+    public Collection<Endossement> getFunction() {
+        return functions;
+    }
+    
+    public void setFunction(Collection<Endossement> functions) {
+        this.functions = functions;
+    }
+    
+    public void addFunction(Endossement e) {
+        this.functions.add(e);
+    }
+    
 }
