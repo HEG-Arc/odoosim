@@ -1,18 +1,18 @@
-package ch.hearc.ig.tb.odoosim.services;
+package ch.hearc.ig.tb.odoosim.simulator;
 
 import ch.hearc.ig.tb.odoosim.business.*;
-import ch.hearc.ig.tb.odoosim.interactions.Odoo;
+import ch.hearc.ig.tb.odoosim.saasinterfacing.Odoo;
 import java.util.ArrayList;
 import java.util.List;
 import org.w3c.dom.Document;
-import static ch.hearc.ig.tb.odoosim.utils.Utility.*;
+import static ch.hearc.ig.tb.odoosim.utilities.Utility.*;
 import static java.util.Arrays.asList;
 import java.util.HashMap;
 import java.util.Iterator;
-import static ch.hearc.ig.tb.odoosim.utils.Utility.getDataXML;
+import static ch.hearc.ig.tb.odoosim.utilities.Utility.getDataXML;
 
 public class Odoosim {
-
+    
     private String accountOdoo;
     private String passworOdoo;
     private List<Company> companies;
@@ -45,69 +45,68 @@ public class Odoosim {
     public void configurationGame() throws Exception {
         //  L'ordre des opérations ne peut être changé car des dépendances entre
         //  les objets doivent être possible lors de la création de certains autres
-        writeLn(typeOfMessage.INFO, "Début de la configuration");
         
         getOdooAccess();
-        System.out.println("generation stackholders");
         generateStakeholders();
-        System.out.println("generation compagnies");
         generateCompanies();
-        System.out.println("génération des produits");
         generateProduct();
-        System.out.println("génération du marché");
         generateMarketPlace();
-        System.out.println("Début de l'itération sur chaque société");
         Iterator<Company> iCompany = companies.iterator();
         while (iCompany.hasNext()) {
             Company c = iCompany.next();
-            System.out.println("test de la connexion");
             tryConnection(c);
-            System.out.println("dm accounts");
             createMasterDataAccounts(c);
-            System.out.println("dm banque");
             createMasterDataContacts(c, bankers.iterator());
-            System.out.println("dm fournisseur");
             createMasterDataContacts(c, suppliers.iterator());
-            System.out.println("dm actionnaire");
             createMasterDataContacts(c, shareholders.iterator());
-            System.out.println("dm raw");
             createMasterDataRawMaterials(c);
-            System.out.println("dm article");
             createMasterDataProduct(c);
         }
-        System.out.println("génération BOM");
+        
         //  La génération BOM se fait après pour avoir accès aux IDS qu'Odoo génère
         generateBOM();
-        System.out.println("Nouvelle itération sur les companies");
         Iterator<Company> iC2 = companies.iterator();
         while (iC2.hasNext()) {
-            System.out.println("dm BOM");
             Company c = iC2.next();
             createMasterDataBOM(c);
-            System.out.println("dm Accounting");
             createAccountingStructure(c);
         }
     }
 
     public void processingGame() throws Exception {
-        System.out.println("processing game !!!");
-        Iterator iA = getIterator(areas);
-        while (iA.hasNext()) {
-            Area a = (Area) iA.next();
-            generateDemand(day, a);
-        }
         
-        Iterator iC = getIterator(companies);
-        while (iC.hasNext()) {
-            Company c = (Company) iC.next();
-            //stockAuto(day, c);
-            //generateOffers(day, c);
-            List data = wsapi.getData(c.getErp(), c.getUidapiaccess(), passworOdoo, "account.account", asList(asList("code", "=", "1500"))
-                    , new HashMap() {{ put("fields", asList("code", "name", "type"));}});
-            System.out.println("Résultat" + data);
+        int days = 10;
+        int count = 1;
+        long timePerDay = 30000;
+        
+        while(count!=days) {
             
-        }
+            long before = System.currentTimeMillis();
+            System.out.println("Jour " + count + "(Début : " + before + ")");
+            
+            // ------- C'était le corps de la fonction qui fonctionne unitairement -----------------------------------------
+            
+            /*Iterator iA = getIterator(areas);
+            while (iA.hasNext()) {
+                Area a = (Area) iA.next();
+                generateDemand(day, a);
+            }*/
 
+            Iterator iC = getIterator(companies);
+            while (iC.hasNext()) {
+                Company c = (Company) iC.next();
+                stockAuto(day, c);
+                generateOffers(day, c);
+            }
+            
+            
+            
+            // -------------------------------------------------------------------------------------------------------------
+            long after = System.currentTimeMillis();
+            System.out.println("Jour " + count + "(Fin : " + after + ")");
+            count++;
+            Thread.sleep(timePerDay - (after - before));
+        }
     }
 
     public void persistDataGame() throws Exception {
@@ -124,10 +123,10 @@ public class Odoosim {
 
     public void tryConnection(Company c) {
 
-        writeLn(typeOfMessage.INFO, "Connexion de la base de données (" + c.getErp() + ") de l'équipe : " + c.getName());
+        writeLn(typeOfMessage.INFO, "Connexion à l'instance : " + c.getErp() + " (" + c.getName() + ")");
         try {
             c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
-            writeLn(typeOfMessage.INFO, "-> OK!");
+            writeLn(typeOfMessage.INFO, " -> Succès!");
         } catch (Exception e) {
             writeLn(typeOfMessage.ERROR, e.getMessage());
         }
@@ -135,6 +134,46 @@ public class Odoosim {
     
     public void generateOffers(int day, Company c) throws Exception {
         
+        for(Product p : products) {
+            if(p instanceof Good) {
+                /*List state = wsapi.getData(c.getErp(), c.getUidapiaccess(), passworOdoo, "product.template",
+                asList(asList("name", "=", p.getName())), new HashMap() {{ put("fields", asList("list_price", "qty_available")); }});
+                if(!(0> (int) state.get(0))) {
+                HashMap hm = (HashMap) state.get(0);
+                }*/
+                Object tuple = wsapi.getTuple(c.getErp(), c.getUidapiaccess(), passworOdoo, "product.template", 
+                        asList(asList("name", "=", p.getName())), new HashMap() {{ put("fields", asList("list_price", "qty_available")); }});
+                
+                if(tuple instanceof HashMap) {
+                    HashMap product = (HashMap) tuple;
+                    Offer o = new Offer(p, c);
+                    
+                    try {
+                        o = (Offer) searchElement(o, (List<Offer>) c.getOffers());
+                    } catch (Exception e) {
+                        o.setOwner(c);
+                        o.setProduct(p);
+                    } finally {
+                        if(!((Double) product.get("qty_available")<1)) {
+                            o.setDay(day);
+                            o.setPrice((Double) product.get("list_price"));
+                            o.setQuantity((Double) product.get("qty_available"));
+                            c.addOffer(o);
+                        }
+                    }
+                    
+                } else
+                    writeLn(typeOfMessage.ERROR, "Erreur de génération de l'offre pour " + c.getName());
+            }
+        
+        //  Regarder si l'offre existe
+        
+            // Si oui, updater prix et quantité
+            
+            // Si non, créer
+        
+        //  Créer un objet offre représentant ce statut
+        }
     }
 
     public void generateProduct() throws Exception {
@@ -163,10 +202,9 @@ public class Odoosim {
 
         List<String> companies = getDataXML(scenario, "//company/@name");
         for (int i = 0; i < companies.size(); i++) {
-
             Company c = new Company(companies.get(i));
             List<String> subQR = getDataXML(scenario, "//company[@name='" + companies.get(i) + "']/erp/@database ");
-            c.setErp(subQR.get(0));
+            c.setErp(String.valueOf(subQR.get(0)).toLowerCase());
             c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
             List<String> collaborators = getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player");
             for (int ii = 0; ii < collaborators.size(); ii++) {
@@ -477,7 +515,7 @@ public class Odoosim {
         }
     }
 
-    public <T> Object searchElement(Object o, List<T> liste) {
+    public <T> Object searchElement(Object o, List<T> liste) throws Exception {
 
         int size = liste.size();
         for (int i = 0; i < size; i++) {
@@ -485,7 +523,7 @@ public class Odoosim {
                 return (Object) liste.get(i);
             }
         }
-        return null;
+        throw new Exception("Element introuvable ! ");
     }
     
     public void stockAuto(int day, Company c) throws Exception {

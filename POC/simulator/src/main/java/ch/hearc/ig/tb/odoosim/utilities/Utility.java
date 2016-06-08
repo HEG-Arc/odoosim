@@ -1,4 +1,4 @@
-package ch.hearc.ig.tb.odoosim.utils;
+package ch.hearc.ig.tb.odoosim.utilities;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,6 +46,23 @@ public class Utility {
             }
         
         System.out.println(type + "" + message);
+        } catch (Exception e) {
+            System.out.println(typeOfMessage.ERROR + e.getMessage());
+        }
+    }
+    
+    public static void writeLn(typeOfMessage type, Object message, Boolean newLine) {
+        try {
+            if(message==null)
+                message = "Inconnu";
+            else {
+                if(!(message instanceof String))
+                    message = message.toString();
+            }
+            if(newLine)
+                System.out.println(type + "" + message);
+            else
+                System.out.print(message);
         } catch (Exception e) {
             System.out.println(typeOfMessage.ERROR + e.getMessage());
         }

@@ -3,56 +3,16 @@
     <odoo protocole="https" dns="odoo.com">
         <account>anthony.tomat@he-arc.ch</account>
         <password>Welcome</password>
-        <dbtemplate>edu-odoosim-template</dbtemplate>
+        <dbtemplate>eDU-odoosim-template</dbtemplate>
         <defaultstock>
             <name>Stock</name>
         </defaultstock>
     </odoo>
     <companies>
-        <company name="Team_A">
-            <erp database="edu-odoosim-at1-7616"/>
+        <company name="Equipe A">
+            <erp database="EDU-odoosim-at1-7616"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
-                    <name>Anthony Tomat</name>
-                    <roles>
-                        <role>
-                            <name>Sales</name>
-                            <value>Manager</value>
-                        </role>
-                    </roles>
-                </player>
-            </players>
-            <bank>
-                <name>VUBS SA</name>
-            </bank>
-            <shareholder>
-                <name>Breweries Holding Corp.</name>
-            </shareholder>
-        </company>
-        <company name="Team_B">
-            <erp database="edu-odoosim-at2-7616"/>
-            <players>
-                <player login="bumplitz@mailinator.com">
-                    <name>Anthony Tomat</name>
-                    <roles>
-                        <role>
-                            <name>Sales</name>
-                            <value>Manager</value>
-                        </role>
-                    </roles>
-                </player>
-            </players>
-            <bank>
-                <name>VUBS SA</name>
-            </bank>
-            <shareholder>
-                <name>Breweries Holding Corp.</name>
-            </shareholder>
-        </company>
-        <company name="Team_C">
-                <erp database="edu-odoosim-at3-7616"/>
-            <players>
-                <player login="zizitop@mailinator.com">
                     <name>Anthony Tomat</name>
                     <roles>
                         <role>

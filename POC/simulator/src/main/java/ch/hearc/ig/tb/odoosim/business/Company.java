@@ -21,6 +21,7 @@ public class Company {
     public Company(String name) {
         this.name = name;
         this.collaborators = new ArrayList<>();
+        this.offers = new ArrayList<>();
     }
 
     public int getId() {
@@ -100,8 +101,7 @@ public class Company {
         this.collaborators.add(c);
     }
     
-    public void addOffer(Offer o, Product p) {
-        o.setProduct(p);
+    public void addOffer(Offer o) {
         this.offers.add(o);
     }
 }

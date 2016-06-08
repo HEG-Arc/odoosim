@@ -1,4 +1,4 @@
-package ch.hearc.ig.tb.odoosim.interactions;
+package ch.hearc.ig.tb.odoosim.saasinterfacing;
 
 import java.net.URL;
 import static java.util.Arrays.asList;
@@ -92,11 +92,12 @@ public class Odoo {
         try {
             setConfiguration(2, database);
             object.setConfig(configuration);
-
+            
             List<Object> asList = asList((Object[]) object.execute("execute_kw", asList(
                     database, uid, password,
                     model, "search_read",
                     asList(criteria), fields)));
+            
             
             if(asList.size()<1)
                 return asList(-1);
@@ -106,6 +107,27 @@ public class Odoo {
 
         } catch (Exception e) {
             return asList(-1);
+        }
+    }
+    
+    public Object getTuple(String database, int uid, String password, String model, List criteria, HashMap fields) {
+        try {
+            setConfiguration(2, database);
+            object.setConfig(configuration);
+            
+            Object[] asList = (Object[]) object.execute("execute_kw", asList(
+                    database, uid, password,
+                    model, "search_read",
+                    asList(criteria), fields));
+            System.out.println("test");
+            
+            if(asList.length>0)
+                return asList[0];
+            else
+                return -1;
+                
+        } catch (Exception e) {
+            return -1;
         }
     }
 
