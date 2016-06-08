@@ -31,10 +31,6 @@
         </company>
     </companies>
     <scenario>
-        <rounds>
-            <number>4</number>
-            <time>780</time>
-        </rounds>
         <contacts>
             <contact company_type="company" customer="false" supplier="true" type="supplier">Maltonne SA</contact>
             <contact company_type="company" customer="false" supplier="true" type="supplier">Ourseau SA</contact>
@@ -316,7 +312,7 @@
                 <stockentry>50000</stockentry>
             </product_sellable>
         </products>
-        <markets baseVolumDemandDay="10000">
+        <markets baseVolumDemandDay="13000">
             <!-- La somme des attributs "part" de l'élément "market" doit valoir "100" (%) qui représente
             les parts de marché pour une région donnée-->
             <market part="30.00">
@@ -532,6 +528,13 @@
         </accounting>
     </scenario>
     <settings>
+        <simulation>
+            <round qty="4">
+                <day durationSeconds="10">
+                    <number>10</number>
+                </day>
+            </round>
+        </simulation>
         <rules>
             <autoinventorygoods activ="true" quantityPerDay="1000"/>
         </rules>

@@ -119,7 +119,6 @@ public class Odoo {
                     database, uid, password,
                     model, "search_read",
                     asList(criteria), fields));
-            System.out.println("test");
             
             if(asList.length>0)
                 return asList[0];

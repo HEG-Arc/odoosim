@@ -7,7 +7,7 @@ public class Retailer {
     protected int id;
     protected String name;
     protected Collection<Demand> demands;
-    protected Collection<Product> productsPreferences;
+    protected Collection<Good> productsPreferences;
     protected Double marketPart;
     protected Double elasticity;
     protected int dayToPay;
@@ -41,6 +41,7 @@ public class Retailer {
     }
     
     public void addDemand(Demand d) {
+        d.setOwner(this);
         this.demands.add(d);
     }
     
@@ -56,11 +57,11 @@ public class Retailer {
         this.demands = demands;
     }
 
-    public Collection<Product> getProductsPreferences() {
+    public Collection<Good> getProductsPreferences() {
         return productsPreferences;
     }
 
-    public void setProductsPreferences(Collection<Product> productsPreferences) {
+    public void setProductsPreferences(Collection<Good> productsPreferences) {
         this.productsPreferences = productsPreferences;
     }
 
@@ -104,7 +105,7 @@ public class Retailer {
         this.type = type;
     }
     
-    public void addPreference(Product p) {
+    public void addPreference(Good p) {
         this.productsPreferences.add(p);
     }
 
