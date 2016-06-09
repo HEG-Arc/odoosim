@@ -5,6 +5,7 @@ import java.util.*;
 public class Company {
 
     private Collection<Offer> offers;
+    private Collection<Exchange> exchanges;
     private int id;
     /**
      * This code is an business field. It takes the number of simulation with
@@ -22,6 +23,7 @@ public class Company {
         this.name = name;
         this.collaborators = new ArrayList<>();
         this.offers = new ArrayList<>();
+        this.exchanges = new ArrayList<>();
     }
 
     public int getId() {
@@ -101,7 +103,20 @@ public class Company {
         this.collaborators.add(c);
     }
     
+    public void addExchange(Exchange e) {
+        exchanges.add(e);
+    }
+    
     public void addOffer(Offer o) {
         this.offers.add(o);
     }
+
+    public Collection<Exchange> getExchanges() {
+        return exchanges;
+    }
+
+    public void setExchanges(Collection<Exchange> exchanges) {
+        this.exchanges = exchanges;
+    }
+    
 }

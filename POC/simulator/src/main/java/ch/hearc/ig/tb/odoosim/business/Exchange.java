@@ -2,34 +2,60 @@ package ch.hearc.ig.tb.odoosim.business;
 
 public class Exchange {
 
-	private int id;
-	private int day;
-	private int quantity;
-	private Offer vendor;
-	private Demand buyer;
+    private int id;
+    private int day;
+    private Double quantity;
+    private Company vendor;
+    private Retailer buyer;
 
-	public int getId() {
-		return this.id;
-	}
+    public Exchange(int day, Double quantity, Retailer buyer, Company vendor) {
+        this.day = day;
+        this.quantity = quantity;
+        this.vendor = vendor;
+        this.buyer = buyer;
+    }
+    
+    public Exchange() {
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return this.id;
+    }
 
-	public int getDay() {
-		return this.day;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setDay(int day) {
-		this.day = day;
-	}
+    public int getDay() {
+        return this.day;
+    }
 
-	public int getQuantity() {
-		return this.quantity;
-	}
+    public void setDay(int day) {
+        this.day = day;
+    }
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
+    public Double getQuantity() {
+        return this.quantity;
+    }
+
+    public void setQuantity(Double quantity) {
+        this.quantity = quantity;
+    }
+
+    public Company getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(Company vendor) {
+        this.vendor = vendor;
+    }
+
+    public Retailer getBuyer() {
+        return buyer;
+    }
+
+    public void setBuyer(Retailer buyer) {
+        this.buyer = buyer;
+    }
 
 }

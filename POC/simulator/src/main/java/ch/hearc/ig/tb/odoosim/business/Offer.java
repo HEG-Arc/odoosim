@@ -2,19 +2,19 @@ package ch.hearc.ig.tb.odoosim.business;
 
 import java.util.*;
 
-public class Offer {
+public class Offer implements Comparable<Offer>{
     private Company owner;
-    private Product product;
+    private Good product;
     private int id;
     private int day;
     private Double quantity;
     private Double price;
-    private Collection<Exchange> exchanges;
+    //private Collection<Exchange> exchanges;
     
-    public Offer(Product product, Company owner) {
+    public Offer(Good product, Company owner) {
         this.product = product;
         this.owner = owner;
-        exchanges = new ArrayList<>();
+        //exchanges = new ArrayList<>();
     }
 
     
@@ -58,21 +58,22 @@ public class Offer {
         this.price = price;
     }
 
-    public Product getProduct() {
+    public Good getProduct() {
         return product;
     }
 
-    public void setProduct(Product product) {
+    public void setProduct(Good product) {
+        product.addOffer(this);
         this.product = product;
     }
 
-    public Collection<Exchange> getExchanges() {
+    /*public Collection<Exchange> getExchanges() {
         return exchanges;
     }
 
     public void setExchanges(Collection<Exchange> exchanges) {
         this.exchanges = exchanges;
-    }
+    }*/
 
     @Override
     public int hashCode() {
@@ -101,6 +102,21 @@ public class Offer {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int compareTo(Offer o) {
+        if(this.price> o.price)
+            return 1;
+        else if (this.price == o.price) {
+            if(this.quantity>o.quantity)
+                return 1;
+            else if (this.quantity == o.quantity)
+                return 0;
+            else
+                return -1;
+        } else
+            return -1;
     }
 
 }

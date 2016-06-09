@@ -4,14 +4,14 @@ import java.util.*;
 
 public class Demand {
 
-    private Product product;
+    private Good product;
     private int id;
     private int day;
-    private int quantity;
+    private Double quantity;
     private Exchange transaction;
     private Retailer owner;
 
-    public Demand(Product product, int day, int quantity) {
+    public Demand(Good product, int day, Double quantity) {
         this.product = product;
         this.day = day;
         this.quantity = quantity;
@@ -21,11 +21,11 @@ public class Demand {
         return this.id;
     }
 
-    public Product getProduct() {
+    public Good getProduct() {
         return product;
     }
 
-    public void setProduct(Product product) {
+    public void setProduct(Good product) {
         this.product = product;
     }
 
@@ -59,11 +59,11 @@ public class Demand {
         this.day = day;
     }
 
-    public int getQuantity() {
+    public Double getQuantity() {
         return this.quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
     }
 

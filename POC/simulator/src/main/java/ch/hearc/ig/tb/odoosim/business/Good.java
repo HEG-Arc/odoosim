@@ -61,6 +61,17 @@ public class Good extends Product {
         this.billOfMaterials.put(idProduct, quantity);
     }
     
+    public void addOffer(Offer offer) {
+        vendors.add(offer);
+    }
+    
+    public Double getMarketAvailability() {
+        Double available = 0.0;
+        for(Offer o : vendors)
+            available+=o.getQuantity();
+        return available;
+    }
+    
     @Override
     public int hashCode() {
         return Objects.hash(this.getName());
