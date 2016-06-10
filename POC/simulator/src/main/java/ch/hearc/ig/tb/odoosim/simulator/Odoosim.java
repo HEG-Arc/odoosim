@@ -17,7 +17,8 @@ public class Odoosim {
     private String accountOdoo;
     private String passworOdoo;
     private List<Company> companies;
-    private List<Product> products;
+    private List<Good> products;
+    private List<Rawmaterial> rawMaterials;
     private List<Banker> bankers;
     private List<Supplier> suppliers;
     private List<Shareholder> shareholders;
@@ -34,6 +35,7 @@ public class Odoosim {
     private int rounds;
     private int dayByRound;
     private int daysDuration;
+    private Double renewalStockQuantity;
     private int PKI_volum_demands;
     private int PKI_volum_offers;
     private int PKI_volum_transactions;
@@ -49,7 +51,7 @@ public class Odoosim {
         suppliers = new ArrayList<>();
         shareholders = new ArrayList<>();
         areas = new ArrayList<>();
-
+        rawMaterials = new ArrayList<>();
         demands = new ArrayList<>();
         offers = new ArrayList<>();
 
@@ -90,7 +92,7 @@ public class Odoosim {
     }
 
     public void processingGame() throws Exception {
-        
+
         while (day <= dayByRound) {
             //  Génération d'indicateurs journaliers
             PKI_volum_demands = 0;
@@ -100,39 +102,32 @@ public class Odoosim {
 
             long before = System.currentTimeMillis();
             System.out.println("\n\rDate : " + day + "/" + month + " (durée jdu jours simulés = " + (daysDuration) + " secondes)\n\r");
-
-            //  Gestion de la demande
-            Iterator iA = getIterator(areas);
-            while (iA.hasNext()) {
-                Area a = (Area) iA.next();
-                generateDemand(day, a);
+            
+            for (Area area : areas) {
+                generateDemand(area.getConsumers());
             }
 
-            //  Gestion de l'offre
-            Iterator iC = getIterator(companies);
-            while (iC.hasNext()) {
-                Company c = (Company) iC.next();
-                stockAuto(day, c);
-                generateOffers(day, c);
+            for (Company company : companies) {
+                company.stockEntry(wsapi, day, month, renewalStockQuantity, products);
+                generateOffers(company);
             }
 
             Collections.shuffle(areas);
-            
             for (Area a : areas) {
-                
                 Collections.shuffle(a.getConsumers());
-                for (Retailer r : a.getConsumers()) {
-                    r.buy(wsapi, day, month);
-                }
+                for (Retailer r : a.getConsumers())
+                    PKI_volum_transactions += r.buy(wsapi, day, month);
             }
-            //  à supprimer en version finale
-            PKI_volum_transactions = countExchanges();
+            
             long after = System.currentTimeMillis();
             day++;
-            System.out.println("Temps des opérations : " + (after-before));
+            System.out.println("Temps des opérations : " + (after - before));
             //  Au cas où les opérations ont été anormalements longues, nous ne faisons pas l'attente et enchaînons directement
             long waiting = (daysDuration * 1000) - (after - before);
             System.out.println("Temps d'attente : " + waiting);
+            System.out.println("Transaction durant le round => " + PKI_volum_transactions + "  => Company A (" + 
+                    companies.get(0).getExchanges().size() + ") Company B (" + companies.get(1).getExchanges().size() + ")");
+            
             if (waiting > 0) {
                 Thread.sleep(waiting);
             }
@@ -142,7 +137,7 @@ public class Odoosim {
             System.out.println("   --> Nombre de transactions sur le marché (cumulée) " + PKI_volum_transactions);
             System.out.println("\n\rDurée des opérations de simulation " + ((after - before) / 1000) + " secondes..."); */
         }
-        if(--rounds>0) {
+        if (--rounds > 0) {
             month++;
             day = 1;
             this.processingGame();
@@ -155,15 +150,17 @@ public class Odoosim {
         rounds = Integer.parseInt(getDataXML(scenario, "//simulation/round/@qty").get(0));
         dayByRound = Integer.parseInt(getDataXML(scenario, "//simulation/round/day/number").get(0));
         daysDuration = Integer.parseInt(getDataXML(scenario, "//simulation/round/day/@durationSeconds").get(0));
+        renewalStockQuantity = Double.parseDouble(getDataXML(scenario, "//autoinventorygoods/@quantityPerDay").get(0));
     }
 
     public int countExchanges() {
         int counter = 0;
-        for(Company c : companies)
+        for (Company c : companies) {
             counter += c.getExchanges().size();
+        }
         return counter;
     }
-    
+
     public int countOffers() {
         int counter = 0;
         for (Company company : companies) {
@@ -205,79 +202,53 @@ public class Odoosim {
         }
     }
 
-    public void generateDemand(int day, Area a) throws Exception {
-        Iterator<Retailer> consumers = a.getConsumers().iterator();
-        while (consumers.hasNext()) {
-            Retailer retailer = consumers.next();
-            Collection<Good> productsPreferences = retailer.getProductsPreferences();
-            for (Good good : productsPreferences) {
-                Demand d = new Demand(good, day, 0.0);
-                d.setOwner(retailer);
-                Integer nbCustomers = a.getConsumers().size();
-                Double partArea = a.getMarketPart();
-                Double partCons = retailer.getMarketPart();
-                //  nbCustomers ne doit pas être comme celui du haut car sinon ça compte tous les revendeurs de la région et c'est
-                //  faux! Là, il faut compter uniquement les revendeurs du même type !!!
-                nbCustomers = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[@type='" + retailer.getType() + "']/@number").get(0));
-                Double demandQty = (double) Math.round(volumPerDayPerProduct / 100 * partArea / nbCustomers / 100 * partCons);
-                if(demandQty<1)
-                    demandQty=1.0;
-
-                try {
-                    d = (Demand) searchElement(d, (List<Demand>) retailer.getDemands());
-                } catch (Exception ex) {
-                    //Logger.getLogger(Odoosim.class.getName()).log(Level.SEVERE, null, ex);
-                    d.setProduct(good);
-                    retailer.addDemand(d);
-                    //  Tester comme pour l'offre (relatif au deux attributs ajoutés le 0906 pour éviter de devoir tout rappatrier
-                    //  lors de la sélection de l'offre (algorithme)
-                    demands.add(d);
-                } finally {
-                    d.setDay(day);
-                    d.setQuantity(demandQty);
+    public void generateDemand(List<Retailer> retailers) throws Exception {
+        for (Retailer retailer : retailers) {
+            retailer.getDemands().clear();
+            for (Good neededProduct : retailer.getProductsPreferences()) {
+                Integer volumMarket = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + retailer.getLocalisation().getName() + "']/retailers/retailer[@type='" + retailer.getType() + "']/@number").get(0));
+                Double quantityNeeded = (double) Math.round(volumPerDayPerProduct / 100 * retailer.getLocalisation().getMarketPart()
+                        / volumMarket / 100 * retailer.getMarketPart());
+                if (quantityNeeded > 1.0) {
+                    Demand demand = new Demand(neededProduct, day, quantityNeeded);
+                    retailer.addDemand(demand);
                 }
-                PKI_volum_demands += demandQty;
             }
         }
-
     }
 
-    public void generateOffers(int day, Company c) throws Exception {
+    public void generateOffers(Company company) throws Exception {
 
-        for (Product p : products) {
-            if (p instanceof Good) {
-                Good g = (Good) p;
-                Object tuple = wsapi.getTuple(c.getErp(), c.getUidapiaccess(), passworOdoo, "product.template",
-                        asList(asList("name", "=", p.getName())), new HashMap() {
-                    {
-                        put("fields", asList("list_price", "qty_available"));
-                    }
-                });
+        for (Good good : products) {
+            Object tuple = wsapi.getTuple(company.getErp(), company.getUidapiaccess(), company.getPassapiaccess(), "product.template",
+                    asList(asList("name", "=", good.getName())), new HashMap() {
+                {
+                    put("fields", asList("list_price", "qty_available"));
+                }
+            });
+            if (tuple instanceof HashMap) {
+                HashMap product = (HashMap) tuple;
+                Offer o = new Offer(good, company);
 
-                if (tuple instanceof HashMap) {
-                    HashMap product = (HashMap) tuple;
-                    Offer o = new Offer(g, c);
-
-                    try {
-                        o = (Offer) searchElement(o, (List<Offer>) c.getOffers());
-                    } catch (Exception e) {
-                        o.setOwner(c);
-                        o.setProduct(g);
-                        c.addOffer(o);
+                try {
+                    o = (Offer) searchElement(o, (List<Offer>) company.getOffers());
+                } catch (Exception e) {
+                        o.setOwner(company);
+                        o.setProduct(good);
+                        company.addOffer(o);
                         //  Tester si cela fonctionne !
                         //offers.add(o);
-                    } finally {
-                        if (!((Double) product.get("qty_available") < 1)) {
-                            o.setDay(day);
-                            o.setPrice((Double) product.get("list_price"));
-                            o.setQuantity((Double) product.get("qty_available"));
-                            PKI_volum_offers += o.getQuantity();
-                        }
+                } finally {
+                    if (!((Double) product.get("qty_available") < 1)) {
+                        o.setDay(day);
+                        o.setPrice((Double) product.get("list_price"));
+                        o.setQuantity((Double) product.get("qty_available"));
+                        PKI_volum_offers += o.getQuantity();
                     }
-
-                } else {
-                    writeLn(typeOfMessage.ERROR, "Erreur de génération de l'offre pour " + c.getName());
                 }
+
+            } else {
+                writeLn(typeOfMessage.ERROR, "Erreur de génération de l'offre pour " + company.getName());
             }
         }
     }
@@ -291,7 +262,8 @@ public class Odoosim {
                     Double.parseDouble(getDataXML(scenario, "//product_purchasable[" + (i + 1) + "]/@standard_price").get(0)));
             Supplier s = new Supplier(getDataXML(scenario, "//product_purchasable[" + (i + 1) + "]/supplier/name").get(0));
             r.setSupplier((Supplier) searchElement(s, suppliers));
-            products.add(r);
+            //products.add(r);
+            rawMaterials.add(r);
         }
         //  Création des produits destinés à la vente
         queryResults = getDataXML(scenario, "//product_sellable");
@@ -325,6 +297,8 @@ public class Odoosim {
             Shareholder sh = new Shareholder(getDataXML(scenario, "//company[@name='" + c.getName() + "']/shareholder/name").get(0));
             c.setBanker((Banker) searchElement(b, bankers));
             c.setShareholder((Shareholder) searchElement(sh, shareholders));
+            c.setIdStock((Integer) wsapi.getID(c.getErp(), "stock.location", c.getUidapiaccess(), passworOdoo,
+                    asList(asList("name", "=", getDataXML(scenario, "//defaultstock/name").get(0)))));
             this.companies.add(c);
         }
     }
@@ -333,10 +307,10 @@ public class Odoosim {
         //  Récupération à partir du fichier settings.xml
         List<String> preferences = getDataXML(scenario, "//markets/market[name='" + r.getLocalisation().getName()
                 + "']/retailers/retailer[@type='" + r.getType() + "']/preferences/product");
-        for (int i=0; i<preferences.size();i++) {
+        for (int i = 0; i < preferences.size(); i++) {
             Good p = new Good("tempo");
             p.setCode(getDataXML(scenario, "//markets/market[name='" + r.getLocalisation().getName()
-                + "']/retailers/retailer[@type='" + r.getType() + "']/preferences/product[" + (i + 1) + "]/code").get(0));
+                    + "']/retailers/retailer[@type='" + r.getType() + "']/preferences/product[" + (i + 1) + "]/code").get(0));
             try {
                 r.addPreference((Good) searchElement(p, products));
             } catch (Exception e) {
@@ -367,26 +341,21 @@ public class Odoosim {
 
     public void generateBOM() throws Exception {
 
-        Iterator<Product> iP = products.iterator();
-        while (iP.hasNext()) {
-            Product p = (Product) iP.next();
-            if (p instanceof Good) {
-                Good pGood = (Good) p;
-                List<String> bomXML = getDataXML(scenario, "//product_sellable[name='" + p.getName() + "']/bom/product");
-                for (int ii = 0; ii < bomXML.size(); ii++) {
-                    String qty = getDataXML(scenario, "//product_sellable[name='" + p.getName() + "']/bom/product[" + (ii + 1) + "]/@quantity").get(0);
-                    String pro = getDataXML(scenario, "//product_sellable[name='" + p.getName() + "']/bom/product[" + (ii + 1) + "]/name").get(0);
-                    Rawmaterial rwm = new Rawmaterial(pro);
-                    rwm = (Rawmaterial) searchElement(rwm, products);
-                    pGood.addBOM(rwm.getId(), Double.parseDouble(qty));
-                }
+        for (Good good : products) {
+            List<String> bomXML = getDataXML(scenario, "//product_sellable[name='" + good.getName() + "']/bom/product");
+            for (int ii = 0; ii < bomXML.size(); ii++) {
+                String qty = getDataXML(scenario, "//product_sellable[name='" + good.getName() + "']/bom/product[" + (ii + 1) + "]/@quantity").get(0);
+                String pro = getDataXML(scenario, "//product_sellable[name='" + good.getName() + "']/bom/product[" + (ii + 1) + "]/name").get(0);
+                Rawmaterial raw = new Rawmaterial(pro);
+                raw = (Rawmaterial) searchElement(raw, rawMaterials);
+                good.addBOM(raw.getId(), Double.parseDouble(qty));
             }
         }
     }
 
     public void generateRetailers(Area a) throws Exception {
         List<String> retailers = getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer");
-        for(int i=0; i<retailers.size(); i++) {
+        for (int i = 0; i < retailers.size(); i++) {
             String name = getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/name").get(0);
             String type = getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@type").get(0);
             int volum = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@number").get(0));
@@ -395,7 +364,7 @@ public class Odoosim {
             Double part = Double.parseDouble(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@part").get(0));
             Double elasticity = Double.parseDouble(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@elasticity").get(0));
             for (int ii = 0; ii < volum; ii++) {
-                name = name + String.valueOf(ii+1);
+                name = name + String.valueOf(ii + 1);
                 Retailer r = new Retailer(name, part, elasticity, payMin, payMax, type);
                 a.addConsumer(r);
                 generatePreferences(r);
@@ -486,94 +455,81 @@ public class Odoosim {
     }
 
     public void createMasterDataRawMaterials(Company c) throws Exception {
-        HashMap data = new HashMap();
-        Iterator<Product> iP = products.iterator();
-        while (iP.hasNext()) {
-            Product p = iP.next();
-            if (p instanceof Rawmaterial) {
-                Rawmaterial rm = (Rawmaterial) p;
-                int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", rm.getName()),
-                        asList("type", "=", "product")));
-                if (exist < 0) {
-                    data.put("name", rm.getName());
-                    data.put("type", "product");
-                    data.put("default_code", rm.getCode());
-                    data.put("list_price", 00.00);
-                    data.put("standard_price", rm.getPurchasePrice());
-                    data.put("sale_ok", false);
-                    data.put("purchase_ok", true);
-                    data.put("seller_ids", asList(asList(0, false, new HashMap<String, Object>() {
-                        {
-                            put("name", rm.getSupplier().getId());
-                            put("min_qty", 1.00);
-                            put("price", rm.getPurchasePrice());
-                        }
-                    })));
-                    rm.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
-                } else {
-                    rm.setId(exist);
-                }
+
+        for (Rawmaterial rm : rawMaterials) {
+            int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", rm.getName()),
+                    asList("type", "=", "product")));
+            if (exist < 0) {
+                HashMap data = new HashMap();
+                data.put("name", rm.getName());
+                data.put("type", "product");
+                data.put("default_code", rm.getCode());
+                data.put("list_price", 00.00);
+                data.put("standard_price", rm.getPurchasePrice());
+                data.put("sale_ok", false);
+                data.put("purchase_ok", true);
+                data.put("seller_ids", asList(asList(0, false, new HashMap<String, Object>() {
+                    {
+                        put("name", rm.getSupplier().getId());
+                        put("min_qty", 1.00);
+                        put("price", rm.getPurchasePrice());
+                    }
+                })));
+                rm.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
+            } else {
+                rm.setId(exist);
             }
         }
     }
 
     public void createMasterDataProduct(Company c) throws Exception {
-        HashMap data = new HashMap();
-        Iterator<Product> iP = products.iterator();
-        while (iP.hasNext()) {
-            Product p = iP.next();
-            if (p instanceof Good) {
-                Good gd = (Good) p;
-                int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", gd.getName()),
-                        asList("type", "=", "product"), asList("default_code", "=", gd.getCode())));
-                if (exist < 0) {
-                    data.put("name", gd.getName());
-                    data.put("type", "product");
-                    data.put("default_code", gd.getCode());
-                    data.put("list_price", gd.getIndicativeSalePrice());
-                    data.put("standard_price", gd.getPurchasePrice());
-                    data.put("sale_ok", true);
-                    data.put("purchase_ok", false);
-                    gd.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
-                } else {
-                    gd.setId(exist);
-                }
+
+        for (Good gd : products) {
+            int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", gd.getName()),
+                    asList("type", "=", "product"), asList("default_code", "=", gd.getCode())));
+            if (exist < 0) {
+                HashMap data = new HashMap();
+                data.put("name", gd.getName());
+                data.put("type", "product");
+                data.put("default_code", gd.getCode());
+                data.put("list_price", gd.getIndicativeSalePrice());
+                data.put("standard_price", gd.getPurchasePrice());
+                data.put("sale_ok", true);
+                data.put("purchase_ok", false);
+                gd.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
+            } else {
+                gd.setId(exist);
             }
         }
     }
 
     public void createMasterDataBOM(Company c) throws Exception {
 
-        HashMap data = new HashMap();
-        HashMap dataBOM;
-        Iterator<Product> iP = products.iterator();
+        for (Good good : products) {
+            int exist = wsapi.getID(c.getErp(), "mrp.bom", c.getUidapiaccess(), passworOdoo, asList(asList("product_tmpl_id", "=", good.getName())));
+            if (exist < 0) {
+                HashMap dataBOM = new HashMap();
+                HashMap data = new HashMap();
+                dataBOM = (HashMap) good.getBillOfMaterials();
+                Iterator iBOM = dataBOM.keySet().iterator();
+                List aList = new ArrayList<>();
 
-        while (iP.hasNext()) {
-            Product p = iP.next();
-            if (p instanceof Good) {
-                int exist = wsapi.getID(c.getErp(), "mrp.bom", c.getUidapiaccess(), passworOdoo, asList(asList("product_tmpl_id", "=", p.getName())));
-                if (exist < 0) {
-                    dataBOM = (HashMap) ((Good) p).getBillOfMaterials();
-                    Iterator iBOM = dataBOM.keySet().iterator();
-                    List aList = new ArrayList<>();
-
-                    while (iBOM.hasNext()) {
-                        int idProduct = (int) iBOM.next();
-                        Double quantity = (Double) dataBOM.get(idProduct);
-                        HashMap hhmp = new HashMap<String, Object>() {
-                            {
-                                put("product_id", idProduct);
-                                put("product_qty", quantity);
-                            }
-                        };
-                        aList.add(asList(0, false, hhmp));
-                    }
-                    data.put("product_tmpl_id", p.getId());
-                    data.put("product_qty", 1.00);
-                    data.put("type", "normal");
-                    data.put("bom_line_ids", aList);
-                    wsapi.insert(c.getErp(), "mrp.bom", data, c.getUidapiaccess(), passworOdoo);
+                while (iBOM.hasNext()) {
+                    int idProduct = (int) iBOM.next();
+                    Double quantity = (Double) dataBOM.get(idProduct);
+                    HashMap hhmp = new HashMap<String, Object>() {
+                        {
+                            put("product_id", idProduct);
+                            put("product_qty", quantity);
+                        }
+                    };
+                    aList.add(asList(0, false, hhmp));
                 }
+                data.put("product_tmpl_id", good.getId());
+                data.put("product_qty", 1.00);
+                data.put("type", "normal");
+                data.put("bom_line_ids", aList);
+                wsapi.insert(c.getErp(), "mrp.bom", data, c.getUidapiaccess(), passworOdoo);
             }
         }
     }
@@ -628,7 +584,7 @@ public class Odoosim {
     }
 
     public void stockAuto(int day, Company c) throws Exception {
-
+        /*
         //  Récupération du statut de la règle
         String enable = getDataXML(scenario, "//autoinventorygoods/@activ").get(0);
         if (Boolean.valueOf(enable)) {
@@ -669,8 +625,8 @@ public class Odoosim {
                     HashMap move = (HashMap) wsapi.getTuple(c.getErp(), c.getUidapiaccess(), c.getPassapiaccess(), "stock.picking",
                             asList(asList("id", "=", quantID)), new HashMap() {{ put("fields", Collections.EMPTY_LIST); }});
                     System.out.println("Ajoute = " + quantID);*/
-                }
+ /*  }
             }
-        }
+        }*/
     }
 }

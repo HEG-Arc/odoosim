@@ -112,8 +112,8 @@ public class Retailer {
         this.productsPreferences.add(p);
     }
 
-    public void buy(Odoo wsapi, int day, int month) throws Exception {
-
+    public int buy(Odoo wsapi, int day, int month) throws Exception {
+        int c = 0;
         for (Demand d : this.demands) {
             Good good = d.getProduct();
             Collections.sort((List<Offer>) good.getVendors());
@@ -128,22 +128,14 @@ public class Retailer {
                         Double qty = this.getAdjustedQuantity(d, o);
                         if(qty>1) {
                             if (qty > o.getQuantity()) {
-                                System.out.println(o.getOwner().getName() + " - " + d.getOwner().getName());
-                                System.out.println("Quantité demandée : " + qty);
-                                System.out.println("Quantité disponible : " + o.getQuantity());
                                 
                                 Exchange ex = new Exchange(day, o.getQuantity(), this, o.getOwner(), o.getProduct());
                                 this.addExchange(ex);
                                 d.setQuantity(d.getQuantity() - o.getQuantity());
                                 o.setQuantity(o.getQuantity() - o.getQuantity());
                                 o.getOwner().registerSale(wsapi, ex, day, month, o.getPrice());
-                                System.out.println("Echange de : " + o.getQuantity());
-                                
+                                c++;
                             } else if (qty <= o.getQuantity()) {
-                                
-                                System.out.println(o.getOwner().getName() + " - " + d.getOwner().getName());
-                                System.out.println("Quantité demandée : " + qty);
-                                System.out.println("Quantité disponible : " + o.getQuantity());
                                 
                                 Exchange ex = new Exchange(day, qty, this, o.getOwner(), o.getProduct());
                                 this.addExchange(ex);
@@ -154,8 +146,7 @@ public class Retailer {
                                 d.setQuantity(0.0);
                                 o.setQuantity(o.getQuantity() - qty);
                                 o.getOwner().registerSale(wsapi, ex, day, month, o.getPrice());
-                                System.out.println("Echange de : " + qty);
-                                
+                                c++;
                                 break;
                             }
                         } else {
@@ -172,7 +163,9 @@ public class Retailer {
                 if(--numberOffers<1)
                     break;
             }
+            break;
         }
+        return c;
     }
 
     public void addExchange(Exchange ex) {

@@ -19,6 +19,7 @@ public class Company {
     private Collection<Collaborator> collaborators;
     private Banker banker;
     private Shareholder shareholder;
+    private Integer idStock;
 
     public Company(String name) {
         this.name = name;
@@ -107,6 +108,14 @@ public class Company {
         this.shareholder = shareholder;
     }
 
+    public Integer getIdStock() {
+        return idStock;
+    }
+
+    public void setIdStock(Integer idStock) {
+        this.idStock = idStock;
+    }
+
     public void addCollaborators(Collaborator c) {
         c.setCompany(this);
         this.collaborators.add(c);
@@ -128,6 +137,23 @@ public class Company {
         this.exchanges = exchanges;
     }
     
+    public <T>void stockEntry(Odoo wsapi, Integer day, Integer month, Double quantity, List<T> products) {
+        List<Product> allProducts = (List<Product>) products;
+        for(Product product : allProducts) {
+            HashMap data = new HashMap();
+                    data.put("in_date", "2016-" + month + "-" + day + " 00:00:00");
+                    data.put("product_id", product.getId());
+                    data.put("qty", quantity);
+                    data.put("name", "Inventaire automatique pour " + product.getName());
+                    data.put("location_id", idStock);
+                    try {
+                        wsapi.insert(erp, "stock.quant", data, uidapiaccess, passapiaccess);
+                    } catch (Exception e) {
+                        System.out.println("Une erreur est survenue dans l'entrée de stock automatique");
+                    }
+        }
+    }
+    
     public void registerSale(Odoo wsapi, Exchange ex, int day, int month, Double accordingPrice) throws Exception{
         
         HashMap d = new HashMap<String, Object>();
@@ -140,8 +166,8 @@ public class Company {
         int id = wsapi.insert(erp, "sale.order", d, uidapiaccess, passapiaccess);
         HashMap name = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "sale.order", asList(asList("id", "=", id)), 
                 new HashMap() {{ put("fields", asList("name")); }});
-        registerDelivery(wsapi, (String) name.get("name"));
-        registerInvoice(wsapi, (String) name.get("name"));
+        //registerDelivery(wsapi, (String) name.get("name"));
+        //registerInvoice(wsapi, (String) name.get("name"));
     }
     
     public void registerDelivery(Odoo wsapi, String sale) {
