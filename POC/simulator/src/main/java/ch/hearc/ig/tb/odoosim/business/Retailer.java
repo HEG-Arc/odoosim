@@ -1,5 +1,6 @@
 package ch.hearc.ig.tb.odoosim.business;
 
+import ch.hearc.ig.tb.odoosim.saasinterfacing.Odoo;
 import java.util.*;
 
 public class Retailer {
@@ -111,7 +112,7 @@ public class Retailer {
         this.productsPreferences.add(p);
     }
 
-    public void buy(int day) {
+    public void buy(Odoo wsapi, int day, int month) throws Exception {
 
         for (Demand d : this.demands) {
             Good good = d.getProduct();
@@ -131,11 +132,11 @@ public class Retailer {
                                 System.out.println("Quantité demandée : " + qty);
                                 System.out.println("Quantité disponible : " + o.getQuantity());
                                 
-                                Exchange ex = new Exchange(day, o.getQuantity(), this, o.getOwner());
+                                Exchange ex = new Exchange(day, o.getQuantity(), this, o.getOwner(), o.getProduct());
                                 this.addExchange(ex);
                                 d.setQuantity(d.getQuantity() - o.getQuantity());
                                 o.setQuantity(o.getQuantity() - o.getQuantity());
-                                
+                                o.getOwner().registerSale(wsapi, ex, day, month, o.getPrice());
                                 System.out.println("Echange de : " + o.getQuantity());
                                 
                             } else if (qty <= o.getQuantity()) {
@@ -144,7 +145,7 @@ public class Retailer {
                                 System.out.println("Quantité demandée : " + qty);
                                 System.out.println("Quantité disponible : " + o.getQuantity());
                                 
-                                Exchange ex = new Exchange(day, qty, this, o.getOwner());
+                                Exchange ex = new Exchange(day, qty, this, o.getOwner(), o.getProduct());
                                 this.addExchange(ex);
                                 //  Je met à 0.0 car vu que l'offre est triée sur le prix, cela n'aurait pas de sens
                                 //  d'aller voir chez un autre fournisseur qui sera de toute manière plus chère.
@@ -152,8 +153,8 @@ public class Retailer {
                                 //  a contraint le consommateur à faire un trait sur une partie de ses besoins.
                                 d.setQuantity(0.0);
                                 o.setQuantity(o.getQuantity() - qty);
-                                
-                                    System.out.println("Echange de : " + qty);
+                                o.getOwner().registerSale(wsapi, ex, day, month, o.getPrice());
+                                System.out.println("Echange de : " + qty);
                                 
                                 break;
                             }

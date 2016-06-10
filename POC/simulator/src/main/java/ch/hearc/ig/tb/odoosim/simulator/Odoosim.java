@@ -90,7 +90,7 @@ public class Odoosim {
     }
 
     public void processingGame() throws Exception {
-
+        
         while (day <= dayByRound) {
             //  Génération d'indicateurs journaliers
             PKI_volum_demands = 0;
@@ -122,15 +122,17 @@ public class Odoosim {
                 
                 Collections.shuffle(a.getConsumers());
                 for (Retailer r : a.getConsumers()) {
-                    r.buy(day);
+                    r.buy(wsapi, day, month);
                 }
             }
             //  à supprimer en version finale
             PKI_volum_transactions = countExchanges();
             long after = System.currentTimeMillis();
             day++;
+            System.out.println("Temps des opérations : " + (after-before));
             //  Au cas où les opérations ont été anormalements longues, nous ne faisons pas l'attente et enchaînons directement
             long waiting = (daysDuration * 1000) - (after - before);
+            System.out.println("Temps d'attente : " + waiting);
             if (waiting > 0) {
                 Thread.sleep(waiting);
             }
@@ -310,6 +312,7 @@ public class Odoosim {
             List<String> subQR = getDataXML(scenario, "//company[@name='" + companies.get(i) + "']/erp/@database ");
             c.setErp(String.valueOf(subQR.get(0)).toLowerCase());
             c.setUidapiaccess(wsapi.getUID(c.getErp(), accountOdoo, passworOdoo));
+            c.setPassapiaccess(passworOdoo);
             List<String> collaborators = getDataXML(scenario, "//company[@name='" + c.getName() + "']/players/player");
             for (int ii = 0; ii < collaborators.size(); ii++) {
                 Collaborator collabo = new Collaborator(
@@ -635,12 +638,37 @@ public class Odoosim {
                     int quantity = Integer.valueOf(getDataXML(scenario, "//autoinventorygoods/@quantityPerDay").get(0));
                     int pId = products.get(i).getId();
                     HashMap data = new HashMap();
+                    data.put("in_date", "2016-" + month + "-" + day + " 00:00:00");
                     data.put("product_id", pId);
                     data.put("qty", quantity);
                     data.put("name", "Inventaire automatique pour " + products.get(i).getName());
                     data.put("location_id", wsapi.getID(c.getErp(), "stock.location", c.getUidapiaccess(), passworOdoo,
                             asList(asList("name", "=", getDataXML(scenario, "//defaultstock/name").get(0)))));
                     wsapi.insert(c.getErp(), "stock.quant", data, c.getUidapiaccess(), passworOdoo);
+                    /*HashMap picking = (HashMap) wsapi.getTuple(c.getErp(), c.getUidapiaccess(), c.getPassapiaccess(), "stock.picking.type", 
+                            asList(asList("name", "=", "Receipts")), new HashMap(){{ put("fields", asList("id")); }});
+                    int quantity = Integer.valueOf(getDataXML(scenario, "//autoinventorygoods/@quantityPerDay").get(0));
+                    int pId = products.get(i).getId();
+                    int lId = wsapi.getID(c.getErp(), "stock.location", c.getUidapiaccess(), passworOdoo,
+                            asList(asList("name", "=", getDataXML(scenario, "//defaultstock/name").get(0))));
+                    HashMap data = new HashMap();
+                    List<Collaborator> col = (List<Collaborator>) c.getCollaborators();
+                    data.put("partner_id", col.get(0).getId());
+                    data.put("min_date", "2016-01-28 00:00:00");
+                    data.put("move_type", "one");
+                    data.put("date", "2016-01-28 00:00:00");
+                    data.put("location_dest_id", lId);
+                    data.put("location_id", lId);
+                    data.put("move_lines", asList(asList(0, false, 
+                            new HashMap() {{ put("product_id", pId); put("product_uom_qty", quantity); put("product_uom", 1);
+                            put("name", "Automatic by Odoosim");}})));
+                    data.put("picking_type_id", picking.get("id"));
+                    
+                    int quantID = wsapi.insert(c.getErp(), "stock.picking", data, c.getUidapiaccess(), passworOdoo);
+                    wsapi.workflowProgress(c.getErp(), c.getUidapiaccess(), c.getPassapiaccess(), "stock.picking", "do_new_transfert");
+                    HashMap move = (HashMap) wsapi.getTuple(c.getErp(), c.getUidapiaccess(), c.getPassapiaccess(), "stock.picking",
+                            asList(asList("id", "=", quantID)), new HashMap() {{ put("fields", Collections.EMPTY_LIST); }});
+                    System.out.println("Ajoute = " + quantID);*/
                 }
             }
         }

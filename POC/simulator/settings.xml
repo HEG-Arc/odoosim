@@ -9,10 +9,10 @@
         </defaultstock>
     </odoo>
     <companies>
-        <company name="Equipe M. Tomat">
-            <erp database="edu-odoosim-undeplus"/>
+        <company name="TEAM A">
+            <erp database="edu-odoosim-100616d"/>
             <players>
-                <player login="anthony.tomat@gmail.com">
+                <player login="anthony.tomat@mailinator.com">
                     <name>Anthony Tomat</name>
                     <roles>
                         <role>
@@ -29,9 +29,18 @@
                 <name>Breweries Holding Corp.</name>
             </shareholder>
         </company>
-        <company name="Equipe 2">
-            <erp database="edu-odoosim-deuxdeplus"/>
+        <company name="TEAM B">
+            <erp database="edu-odoosim-100616e"/>
             <players>
+                <player login="anthony.tomat@mailinator.com">
+                    <name>Anthony Tomat</name>
+                    <roles>
+                        <role>
+                            <name>Sales</name>
+                            <value>Manager</value>
+                        </role>
+                    </roles>
+                </player>
             </players>
             <bank>
                 <name>VUBS SA</name>
@@ -535,14 +544,14 @@
     </scenario>
     <settings>
         <simulation>
-            <round qty="1">
+            <round qty="4">
                 <day durationSeconds="10">
-                    <number>10</number>
+                    <number>5</number>
                 </day>
             </round>
         </simulation>
         <rules>
-            <autoinventorygoods activ="true" quantityPerDay="10"/>
+            <autoinventorygoods activ="true" quantityPerDay="100"/>
         </rules>
     </settings>
 </odoosim>

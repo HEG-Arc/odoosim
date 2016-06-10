@@ -7,12 +7,14 @@ public class Exchange {
     private Double quantity;
     private Company vendor;
     private Retailer buyer;
+    private Good product;
 
-    public Exchange(int day, Double quantity, Retailer buyer, Company vendor) {
+    public Exchange(int day, Double quantity, Retailer buyer, Company vendor, Good product) {
         this.day = day;
         this.quantity = quantity;
         this.vendor = vendor;
         this.buyer = buyer;
+        this.product = product;
     }
     
     public Exchange() {
@@ -56,6 +58,14 @@ public class Exchange {
 
     public void setBuyer(Retailer buyer) {
         this.buyer = buyer;
+    }
+
+    public Good getProduct() {
+        return product;
+    }
+
+    public void setProduct(Good product) {
+        this.product = product;
     }
 
 }
