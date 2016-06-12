@@ -56,13 +56,4 @@ public class Area {
         c.setLocalisation(this);
         consumers.add(c);
     }
-    
-    public List<Demand> getAllDemands() {
-        List<Demand> demands = new ArrayList<>();
-        for(Retailer retailer : this.getConsumers())
-            for(Demand dem : retailer.getDemands())
-                demands.add(dem);
-        
-        return demands;
-    }
 }

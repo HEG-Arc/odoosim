@@ -3,8 +3,6 @@ package ch.hearc.ig.tb.odoosim.business;
 import ch.hearc.ig.tb.odoosim.saasinterfacing.Odoo;
 import java.util.*;
 import static java.util.Arrays.asList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Company {
 

@@ -9,11 +9,11 @@
         </defaultstock>
     </odoo>
     <companies>
-        <company name="TEAM A">
-            <erp database="edu-odoosim-100616d"/>
+        <company name="TEAM Monica Tomat">
+            <erp database="edu-odoosim-team-monicatomat"/>
             <players>
-                <player login="anthony.tomat@gmail.com">
-                    <name>Anthony Tomat</name>
+                <player login="monica.tomat@gmail.com">
+                    <name>Monica Tomat</name>
                     <roles>
                         <role>
                             <name>Sales</name>
@@ -29,11 +29,11 @@
                 <name>Breweries Holding Corp.</name>
             </shareholder>
         </company>
-        <company name="TEAM B">
-            <erp database="edu-odoosim-100616e"/>
+        <company name="TEAM Primael Tomat">
+            <erp database="edu-odoosim-team-primaeltomat"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
-                    <name>Anthony Tomat</name>
+                    <name>Primaël Tomat</name>
                     <roles>
                         <role>
                             <name>Sales</name>
@@ -143,7 +143,7 @@
                     <name>Maltonne SA</name>
                 </supplier>
             </product_purchasable>
-            <product_sellable type="product" default_code="BW01A" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW01A" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Lager Beer 0.25</name>
                 <!-- Pour définir les quantités de chacune des matières premières, il faut se référer au document
                 de présentation du scénario et faire le rapport des 40 hectolitre = 400000 cl => 16'000 unité de 25
@@ -167,7 +167,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW01B" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW01B" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Lager Beer 0.50</name>
                 <bom>
                     <product quantity="0.50">
@@ -187,7 +187,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW02A" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW02A" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Honing Beer 0.25</name>
                 <bom>
                     <product quantity="0.25">
@@ -210,7 +210,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW02B" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW02B" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Honing Beer 0.50</name>
                 <bom>
                     <product quantity="0.50">
@@ -233,7 +233,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW03A" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW03A" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Lager Beer BIO 0.25</name>
                 <bom>
                     <product quantity="0.25">
@@ -253,7 +253,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW03B" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW03B" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Lager Beer BIO 0.50</name>
                 <bom>
                     <product quantity="0.5">
@@ -273,7 +273,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW04A" list_price="2.00" standard_price="2.00">
+            <product_sellable type="product" default_code="BW04A" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Spice Beer 0.25</name>
                 <bom>
                     <product quantity="0.25">
@@ -296,7 +296,7 @@
                     </product>
                 </bom>
             </product_sellable>
-            <product_sellable type="product" default_code="BW04B" list_price="2.00" standard_price="2.00" bestPrice=">
+            <product_sellable type="product" default_code="BW04B" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Spice Beer 0.50</name>
                 <bom>
                     <product quantity="0.5">
@@ -537,9 +537,9 @@
     </scenario>
     <settings>
         <simulation>
-            <round qty="1">
+            <round qty="2">
                 <day durationSeconds="10">
-                    <number>5</number>
+                    <number>10</number>
                 </day>
             </round>
         </simulation>

@@ -101,23 +101,34 @@ public class Odoosim {
             PKI_volum_transactions = 0;
 
             long before = System.currentTimeMillis();
-            System.out.println("\n\rDate : " + day + "/" + month + " (durée jdu jours simulés = " + (daysDuration) + " secondes)\n\r");
+            System.out.println("\n\rDate : " + day + "/" + month + "/2016 (1 jour simulés en " + (daysDuration) + " secondes)\n\r");
             
+            long bO = System.currentTimeMillis();
             for (Area area : areas) {
                 generateDemand(area.getConsumers());
             }
-
+            long aO = System.currentTimeMillis();
+            System.out.println("Temps de génération de la demande = " + ((aO-bO)/1000));
+            bO = System.currentTimeMillis();
             for (Company company : companies) {
                 company.stockEntry(wsapi, day, month, renewalStockQuantity, products);
                 generateOffers(company);
             }
-
-            Collections.shuffle(areas);
+            aO = System.currentTimeMillis();
+            System.out.println("Temps de génération de l'offre = " + ((aO-bO)/1000));
+            bO = System.currentTimeMillis();
+            for(Good product : products) {
+                product.oadApplication(wsapi, day, month);
+            }
+            aO = System.currentTimeMillis();
+            System.out.println("Temps de l'algo O&D = " + ((aO-bO)/1000));
+                
+            /*Collections.shuffle(areas);
             for (Area a : areas) {
                 Collections.shuffle(a.getConsumers());
                 for (Retailer r : a.getConsumers())
                     PKI_volum_transactions += r.buy(wsapi, day, month);
-            }
+            }*/
             
             long after = System.currentTimeMillis();
             day++;
@@ -125,8 +136,7 @@ public class Odoosim {
             //  Au cas où les opérations ont été anormalements longues, nous ne faisons pas l'attente et enchaînons directement
             long waiting = (daysDuration * 1000) - (after - before);
             System.out.println("Temps d'attente : " + waiting);
-            System.out.println("Transaction durant le round => " + PKI_volum_transactions + "  => Company A (" + 
-                    companies.get(0).getExchanges().size() + ") Company B (" + companies.get(1).getExchanges().size() + ")");
+            System.out.println("Transaction durant le round => " + PKI_volum_transactions);
             
             if (waiting > 0) {
                 Thread.sleep(waiting);
@@ -140,7 +150,7 @@ public class Odoosim {
         if (--rounds > 0) {
             month++;
             day = 1;
-            this.processingGame();
+            processingGame();
         }
     }
 
@@ -165,16 +175,6 @@ public class Odoosim {
         int counter = 0;
         for (Company company : companies) {
             counter += company.getOffers().size();
-        }
-        return counter;
-    }
-
-    public int countDemands() {
-        int counter = 0;
-        for (Area area : areas) {
-            for (Retailer retailer : area.getConsumers()) {
-                counter += retailer.getDemands().size();
-            }
         }
         return counter;
     }
@@ -206,20 +206,23 @@ public class Odoosim {
         for (Retailer retailer : retailers) {
             retailer.getDemands().clear();
             for (Good neededProduct : retailer.getProductsPreferences()) {
+                neededProduct.getDemands().clear();
                 Integer volumMarket = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + retailer.getLocalisation().getName() + "']/retailers/retailer[@type='" + retailer.getType() + "']/@number").get(0));
                 Double quantityNeeded = (double) Math.round(volumPerDayPerProduct / 100 * retailer.getLocalisation().getMarketPart()
                         / volumMarket / 100 * retailer.getMarketPart());
                 if (quantityNeeded > 1.0) {
                     Demand demand = new Demand(neededProduct, day, quantityNeeded);
                     retailer.addDemand(demand);
+                    neededProduct.addDemand(demand);
                 }
             }
         }
     }
 
     public void generateOffers(Company company) throws Exception {
-
+        
         for (Good good : products) {
+            good.getVendors().clear();
             Object tuple = wsapi.getTuple(company.getErp(), company.getUidapiaccess(), company.getPassapiaccess(), "product.template",
                     asList(asList("name", "=", good.getName())), new HashMap() {
                 {
@@ -228,29 +231,19 @@ public class Odoosim {
             });
             if (tuple instanceof HashMap) {
                 HashMap product = (HashMap) tuple;
-                Offer o = new Offer(good, company);
-
-                try {
-                    o = (Offer) searchElement(o, (List<Offer>) company.getOffers());
-                } catch (Exception e) {
-                        o.setOwner(company);
-                        o.setProduct(good);
-                        company.addOffer(o);
-                        //  Tester si cela fonctionne !
-                        //offers.add(o);
-                } finally {
-                    if (!((Double) product.get("qty_available") < 1)) {
-                        o.setDay(day);
-                        o.setPrice((Double) product.get("list_price"));
-                        o.setQuantity((Double) product.get("qty_available"));
-                        PKI_volum_offers += o.getQuantity();
-                    }
+                if (!((Double) product.get("qty_available") < 1)) {
+                    Offer o = new Offer(good, company);
+                    o.setOwner(company);
+                    o.setProduct(good);
+                    o.setDay(day);
+                    o.setPrice((Double) product.get("list_price"));
+                    o.setQuantity((Double) product.get("qty_available"));
+                    company.addOffer(o);
+                    PKI_volum_offers += o.getQuantity();
                 }
-
-            } else {
-                writeLn(typeOfMessage.ERROR, "Erreur de génération de l'offre pour " + company.getName());
             }
-        }
+
+            }
     }
 
     public void generateProduct() throws Exception {
@@ -271,7 +264,8 @@ public class Odoosim {
             Good g = new Good(Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@list_price").get(0)),
                     getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@default_code").get(0),
                     getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/name").get(0),
-                    Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@standard_price").get(0)));
+                    Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@standard_price").get(0)), 
+                    Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@bestPrice").get(0)));
             products.add(g);
         }
     }
