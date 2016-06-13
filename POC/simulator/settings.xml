@@ -9,10 +9,10 @@
         </defaultstock>
     </odoo>
     <companies>
-        <company name="TEAM Monica Tomat">
-            <erp database="edu-odoosim-team-monicatomat"/>
+        <company name="TEAM C">
+            <erp database="edu-odoosim-at01"/>
             <players>
-                <player login="monica.tomat@gmail.com">
+                <player login="anthony.tomat@gmail.com">
                     <name>Monica Tomat</name>
                     <roles>
                         <role>
@@ -29,11 +29,11 @@
                 <name>Breweries Holding Corp.</name>
             </shareholder>
         </company>
-        <company name="TEAM Primael Tomat">
-            <erp database="edu-odoosim-team-primaeltomat"/>
+        <company name="TEAM B">
+            <erp database="edu-odoosim-at02"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
-                    <name>Primaël Tomat</name>
+                    <name>Monica Tomat</name>
                     <roles>
                         <role>
                             <name>Sales</name>
@@ -537,7 +537,7 @@
     </scenario>
     <settings>
         <simulation>
-            <round qty="2">
+            <round qty="1">
                 <day durationSeconds="10">
                     <number>10</number>
                 </day>

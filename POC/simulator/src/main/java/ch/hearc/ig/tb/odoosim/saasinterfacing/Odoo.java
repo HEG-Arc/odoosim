@@ -10,9 +10,10 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class Odoo {
+
     /* Les méthodes "getID", "getData", "searchID", "searchAccountByCode" font la même
     chose mais il faut essayer de les remplacer par la méthode getData ou getID qui sont plus optimisée!
-    */
+     */
     private String protocol;
     private String dns;
     private XmlRpcClientConfigImpl configuration;
@@ -46,6 +47,24 @@ public class Odoo {
         return (int) common.execute(configuration, "authenticate", asList(database, account, password, emptyMap()));
     }
 
+    public Integer count(String database, int uid, String password, String model, List criteria) throws Exception {
+        setConfiguration(2, database);
+        object.setConfig(configuration);
+        return (Integer) object.execute("execute_kw", asList(database, uid, password, model, "search_count", asList(criteria)));
+    }
+    
+    public void changeState(String database, Integer uid, String password, String model, String action, Integer id) {
+        try {
+            setConfiguration(2, database);
+            object.setConfig(configuration);
+            object.execute("execute_kw", asList(
+                                database, uid, password,
+                                model, action, asList(asList(id))));
+        } catch (Exception e) {
+            //loguer qqch
+        }
+    }
+
     /**
      * Cherche dans Odoo l'existance ou non d'un enregistrement selon des
      * critères de recherche et retourne l'ID ou -1 si rien n'est existant
@@ -74,12 +93,16 @@ public class Odoo {
     }
 
     /**
-     * Cette méthode va lire les données dans Odoo et récupérer les enregistrements qui correspondes
-     * aux critères (s'il y en a). Cette méthode donne aussi la possiblité de renseigner les champs que 
-     * l'ont veut en retour.
-     * Exemple d'appel : uneInstanceOdoo.getData(database, uid, password, model, asList(asList("attribut", "opérateur", "valeur"),
-     * asList("attribut2", "opérateur", "valeur"), ...), new HashMap() {{ put("fields", asList("field1", "field2", "field3"));}});
-     * A savoir : le asList et HashMap peuvent être remplacés par Collections.emptyList() ou Collections.emptyMap()
+     * Cette méthode va lire les données dans Odoo et récupérer les
+     * enregistrements qui correspondes aux critères (s'il y en a). Cette
+     * méthode donne aussi la possiblité de renseigner les champs que l'ont veut
+     * en retour. Exemple d'appel : uneInstanceOdoo.getData(database, uid,
+     * password, model, asList(asList("attribut", "opérateur", "valeur"),
+     * asList("attribut2", "opérateur", "valeur"), ...), new HashMap() {{
+     * put("fields", asList("field1", "field2", "field3"));}}); A savoir : le
+     * asList et HashMap peuvent être remplacés par Collections.emptyList() ou
+     * Collections.emptyMap()
+     *
      * @param database L'instance requêtée
      * @param uid L'uid permettant de s'authentifier
      * @param password Le mot de passe du compte d'administration de l'instance
@@ -92,39 +115,39 @@ public class Odoo {
         try {
             setConfiguration(2, database);
             object.setConfig(configuration);
-            
+
             List<Object> asList = asList((Object[]) object.execute("execute_kw", asList(
                     database, uid, password,
                     model, "search_read",
                     asList(criteria), fields)));
-            
-            
-            if(asList.size()<1)
+
+            if (asList.size() < 1) {
                 return asList(-1);
-            
+            }
+
             return asList;
-            
 
         } catch (Exception e) {
             return asList(-1);
         }
     }
-    
+
     public Object getTuple(String database, int uid, String password, String model, List criteria, HashMap fields) {
         try {
             setConfiguration(2, database);
             object.setConfig(configuration);
-            
+
             Object[] asList = (Object[]) object.execute("execute_kw", asList(
                     database, uid, password,
                     model, "search_read",
                     asList(criteria), fields));
-            
-            if(asList.length>0)
+
+            if (asList.length > 0) {
                 return asList[0];
-            else
+            } else {
                 return -1;
-                
+            }
+
         } catch (Exception e) {
             return -1;
         }

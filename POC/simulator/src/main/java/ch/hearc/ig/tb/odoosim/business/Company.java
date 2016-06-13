@@ -152,6 +152,31 @@ public class Company {
         }
     }
     
+    public void updateDateStock(Odoo wsapi, String sourceDocument, Integer day, Integer month, Integer year) throws Exception {
+        //  Terminer la sortie de stock
+        HashMap hm = new HashMap();
+        int picking = wsapi.getID(erp, "stock.picking", uidapiaccess, passapiaccess, asList(asList("origin", "=", sourceDocument)));
+        wsapi.update(erp, "stock.picking", uidapiaccess, passapiaccess, picking, new HashMap(){{ put("date", "2016-" + month + "-" + day + " 00:00:00");}});
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.picking", "do_new_transfer", picking);
+        int immedia = wsapi.getID(erp, "stock.immediate.transfer", uidapiaccess, passapiaccess, asList(asList("pick_id", "=", picking)));
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.immediate.transfer", "process", immedia);
+        //  get stock.pack.operation and update date (optimiser en récupérant uniquement le champ id
+        Object tuple = wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.pack.operation", asList(asList("picking_id", "=", picking)), 
+                new HashMap() {{ put("fields", Collections.emptyList());}});
+        hm = (HashMap) tuple;
+        wsapi.update(erp, "stock.pack.operation", uidapiaccess, passapiaccess, (int) hm.get("id"), 
+                new HashMap(){{ put("date", "2016-" + month + "-" + day + " 00:00:00");}});
+        //  get stock.move and update date
+        Object move = wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.move", asList(asList("picking_id", "=", picking)), 
+                new HashMap() {{ put("fields", Collections.emptyList());}});
+        hm = (HashMap) move;
+           wsapi.update(erp, "stock.move", uidapiaccess, passapiaccess, (int) hm.get("id"), 
+                new HashMap(){{ put("date", "2016-" + month + "-" + day + " 00:00:00");}});
+        
+        
+        
+    }
+    
     public void registerSale(Odoo wsapi, Exchange ex, int day, int month, Double accordingPrice) throws Exception{
         
         HashMap d = new HashMap<String, Object>();
@@ -164,6 +189,7 @@ public class Company {
         int id = wsapi.insert(erp, "sale.order", d, uidapiaccess, passapiaccess);
         HashMap name = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "sale.order", asList(asList("id", "=", id)), 
                 new HashMap() {{ put("fields", asList("name")); }});
+        updateDateStock(wsapi, (String) name.get("name"), day, month, 2016);
         //registerDelivery(wsapi, (String) name.get("name"));
         //registerInvoice(wsapi, (String) name.get("name"));
     }

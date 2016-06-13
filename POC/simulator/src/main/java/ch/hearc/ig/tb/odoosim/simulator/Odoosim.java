@@ -36,7 +36,9 @@ public class Odoosim {
     private int dayByRound;
     private int daysDuration;
     private Double renewalStockQuantity;
+    private int PKI_quantity_demands;
     private int PKI_volum_demands;
+    private int PKI_quantity_offers;
     private int PKI_volum_offers;
     private int PKI_volum_transactions;
     private Double PKI_volum_monetary;
@@ -97,25 +99,31 @@ public class Odoosim {
             //  Génération d'indicateurs journaliers
             PKI_volum_demands = 0;
             PKI_volum_offers = 0;
+            PKI_quantity_demands = 0;
+            PKI_quantity_offers = 0;
             PKI_volum_monetary = 00.00;
             PKI_volum_transactions = 0;
 
             long before = System.currentTimeMillis();
             System.out.println("\n\rDate : " + day + "/" + month + "/2016 (1 jour simulés en " + (daysDuration) + " secondes)\n\r");
             
+            for(Good good : products) {
+                good.getDemands().clear();
+                good.getVendors().clear();
+            }
             long bO = System.currentTimeMillis();
             for (Area area : areas) {
                 generateDemand(area.getConsumers());
             }
             long aO = System.currentTimeMillis();
-            System.out.println("Temps de génération de la demande = " + ((aO-bO)/1000));
+            System.out.println("Temps de génération de la demande = " + ((aO-bO)/1000) + "QTY : " + PKI_quantity_demands + "/VOL : " + PKI_volum_demands);
             bO = System.currentTimeMillis();
             for (Company company : companies) {
                 company.stockEntry(wsapi, day, month, renewalStockQuantity, products);
                 generateOffers(company);
             }
             aO = System.currentTimeMillis();
-            System.out.println("Temps de génération de l'offre = " + ((aO-bO)/1000));
+            System.out.println("Temps de génération de l'offre = " + ((aO-bO)/1000) + "QTY : " + PKI_quantity_offers + "/VOL : " + PKI_volum_offers);
             bO = System.currentTimeMillis();
             for(Good product : products) {
                 product.oadApplication(wsapi, day, month);
@@ -206,7 +214,7 @@ public class Odoosim {
         for (Retailer retailer : retailers) {
             retailer.getDemands().clear();
             for (Good neededProduct : retailer.getProductsPreferences()) {
-                neededProduct.getDemands().clear();
+                //neededProduct.getDemands().clear();
                 Integer volumMarket = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + retailer.getLocalisation().getName() + "']/retailers/retailer[@type='" + retailer.getType() + "']/@number").get(0));
                 Double quantityNeeded = (double) Math.round(volumPerDayPerProduct / 100 * retailer.getLocalisation().getMarketPart()
                         / volumMarket / 100 * retailer.getMarketPart());
@@ -214,6 +222,8 @@ public class Odoosim {
                     Demand demand = new Demand(neededProduct, day, quantityNeeded);
                     retailer.addDemand(demand);
                     neededProduct.addDemand(demand);
+                    PKI_quantity_demands++;
+                    PKI_volum_demands += quantityNeeded;
                 }
             }
         }
@@ -222,7 +232,6 @@ public class Odoosim {
     public void generateOffers(Company company) throws Exception {
         
         for (Good good : products) {
-            good.getVendors().clear();
             Object tuple = wsapi.getTuple(company.getErp(), company.getUidapiaccess(), company.getPassapiaccess(), "product.template",
                     asList(asList("name", "=", good.getName())), new HashMap() {
                 {
@@ -239,6 +248,7 @@ public class Odoosim {
                     o.setPrice((Double) product.get("list_price"));
                     o.setQuantity((Double) product.get("qty_available"));
                     company.addOffer(o);
+                    PKI_quantity_offers++;
                     PKI_volum_offers += o.getQuantity();
                 }
             }
@@ -358,8 +368,7 @@ public class Odoosim {
             Double part = Double.parseDouble(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@part").get(0));
             Double elasticity = Double.parseDouble(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@elasticity").get(0));
             for (int ii = 0; ii < volum; ii++) {
-                name = name + String.valueOf(ii + 1);
-                Retailer r = new Retailer(name, part, elasticity, payMin, payMax, type);
+                Retailer r = new Retailer(name + (ii+1), part, elasticity, payMin, payMax, type);
                 a.addConsumer(r);
                 generatePreferences(r);
             }

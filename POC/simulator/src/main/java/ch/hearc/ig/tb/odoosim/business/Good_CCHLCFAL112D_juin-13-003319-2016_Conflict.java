@@ -93,9 +93,7 @@ public class Good extends Product {
     }
     
     public void oadApplication(Odoo wsapi, int day, int month) throws Exception {
-        Collections.shuffle((List<?>) demands);
         for (Demand demand : demands) {
-            Collections.shuffle((List<?>) vendors);
             Collections.sort((List<Offer>) vendors);
             int numberOffers = vendors.size();
             //  Avec cette ligne, il faudrait faire que la méthode getMarketAvailability puisse définir le prix maximum auquel le client est d'accord
@@ -117,7 +115,7 @@ public class Good extends Product {
                                 //demand.getOwner().addExchange(ex);
                                 demand.setQuantity(demand.getQuantity() - offer.getQuantity());
                                 offer.setQuantity(offer.getQuantity() - offer.getQuantity());
-                                offer.getOwner().registerSale(wsapi, ex, day, month, offer.getPrice());                                
+                                offer.getOwner().registerSale(wsapi, ex, day, month, offer.getPrice());
                             } else if (qty <= offer.getQuantity()) {
                                 
                                 Exchange ex = new Exchange(day, offer.getQuantity(), offer.getPrice(), demand.getOwner(), offer.getOwner(), this);
