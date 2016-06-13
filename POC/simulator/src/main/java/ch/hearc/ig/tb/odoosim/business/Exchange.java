@@ -3,39 +3,34 @@ package ch.hearc.ig.tb.odoosim.business;
 public class Exchange {
 
     private int id;
-    private int day;
     private Double quantity;
     private Double price;
     private Company vendor;
     private Retailer buyer;
     private Good product;
+    private String name;
+    private String date;
+    private Integer idInvoice;
+    private Integer idPayment;
 
-    public Exchange(int day, Double quantity,Double price, Retailer buyer, Company vendor, Good product) {
-        this.day = day;
+    public Exchange() {
+    }
+    
+    public Exchange(Double quantity,Double price, Retailer buyer, Company vendor, Good product, String date) {
         this.quantity = quantity;
         this.price = price;
         this.vendor = vendor;
         this.buyer = buyer;
         this.product = product;
+        this.date = date;
     }
     
-    public Exchange() {
-    }
-
     public int getId() {
         return this.id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getDay() {
-        return this.day;
-    }
-
-    public void setDay(int day) {
-        this.day = day;
     }
 
     public Double getQuantity() {
@@ -78,4 +73,36 @@ public class Exchange {
         this.product = product;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public Integer getIdInvoice() {
+        return idInvoice;
+    }
+
+    public void setIdInvoice(Integer idInvoice) {
+        this.idInvoice = idInvoice;
+    }
+
+    public Integer getIdPayment() {
+        return idPayment;
+    }
+
+    public void setIdPayment(Integer idPayment) {
+        this.idPayment = idPayment;
+    }
+    
 }

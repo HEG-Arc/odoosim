@@ -9,7 +9,6 @@ public class Offer implements Comparable<Offer>{
     private int day;
     private Double quantity;
     private Double price;
-    //private Collection<Exchange> exchanges;
     
     public Offer(Good product, Company owner) {
         this.product = product;
@@ -17,7 +16,6 @@ public class Offer implements Comparable<Offer>{
         //exchanges = new ArrayList<>();
     }
 
-    
     public int getId() {
         return this.id;
     }
@@ -66,14 +64,6 @@ public class Offer implements Comparable<Offer>{
         product.addOffer(this);
         this.product = product;
     }
-
-    /*public Collection<Exchange> getExchanges() {
-        return exchanges;
-    }
-
-    public void setExchanges(Collection<Exchange> exchanges) {
-        this.exchanges = exchanges;
-    }*/
 
     @Override
     public int hashCode() {

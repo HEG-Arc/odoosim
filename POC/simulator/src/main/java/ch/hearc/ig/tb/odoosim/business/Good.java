@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.hearc.ig.tb.odoosim.business;
 
 import ch.hearc.ig.tb.odoosim.saasinterfacing.Odoo;
@@ -14,17 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- *
- * @author tomant
- */
 public class Good extends Product {
     
     private Collection<Offer> vendors;
     private Collection<Demand> demands;
     private Double indicativeSalePrice;
     private Double customerBestPrice;
-    //  Key = id Raw Material, Value = quantity of RM
     private Map<Integer, Double> billOfMaterials;
     
     public Good(String name) {
@@ -92,7 +82,7 @@ public class Good extends Product {
         demands.add(demand);
     }
     
-    public void oadApplication(Odoo wsapi, int day, int month) throws Exception {
+    public void oadApplication(Odoo wsapi, String date) throws Exception {
         Collections.shuffle((List<?>) demands);
         for (Demand demand : demands) {
             Collections.shuffle((List<?>) vendors);
@@ -113,14 +103,16 @@ public class Good extends Product {
                         if(qty>1) {
                             if (qty > offer.getQuantity()) {
                                 
-                                Exchange ex = new Exchange(day, offer.getQuantity(), offer.getPrice(), demand.getOwner(), offer.getOwner(), this);
+                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand.getOwner(), 
+                                        offer.getOwner(), this, date);
                                 //demand.getOwner().addExchange(ex);
                                 demand.setQuantity(demand.getQuantity() - offer.getQuantity());
                                 offer.setQuantity(offer.getQuantity() - offer.getQuantity());
-                                offer.getOwner().registerSale(wsapi, ex, day, month, offer.getPrice());                                
+                                offer.getOwner().processSale(wsapi, ex);                                
                             } else if (qty <= offer.getQuantity()) {
                                 
-                                Exchange ex = new Exchange(day, offer.getQuantity(), offer.getPrice(), demand.getOwner(), offer.getOwner(), this);
+                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand.getOwner(), 
+                                        offer.getOwner(), this, date);
                                 //demand.getOwner().addExchange(ex);
                                 //  Je met à 0.0 car vu que l'offre est triée sur le prix, cela n'aurait pas de sens
                                 //  d'aller voir chez un autre fournisseur qui sera de toute manière plus chère.
@@ -128,7 +120,7 @@ public class Good extends Product {
                                 //  a contraint le consommateur à faire un trait sur une partie de ses besoins.
                                 demand.setQuantity(0.0);
                                 offer.setQuantity(offer.getQuantity() - qty);
-                                offer.getOwner().registerSale(wsapi, ex, day, month, offer.getPrice());
+                                offer.getOwner().processSale(wsapi, ex);
                                 break;
                             }
                         } else {
@@ -147,24 +139,6 @@ public class Good extends Product {
             }
             break;
         }
-    }
-    
-    private Double getAdjustedQuantity(Demand d, Offer o) {
-        Double elasticity = d.getOwner().getElasticity();
-        if (elasticity > 0) {
-            elasticity = elasticity * -1;
-        }
-
-        Double optimum = d.getProduct().getIndicativeSalePrice();
-        Double offerPrice = o.getPrice();
-
-        Double variationPrice = (offerPrice - optimum) / optimum;
-
-        Double variationQuantity = variationPrice * elasticity;
-
-        Double resultat = (variationQuantity / 100) * d.getQuantity() + d.getQuantity();
-
-        return (double) Math.round(resultat);
     }
     
     public Double getMarketAvailability() {
@@ -192,6 +166,4 @@ public class Good extends Product {
         else
             return false;
     }
-    
-    
 }

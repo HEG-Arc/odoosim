@@ -1,6 +1,5 @@
 package ch.hearc.ig.tb.odoosim.business;
 
-import ch.hearc.ig.tb.odoosim.saasinterfacing.Odoo;
 import java.util.*;
 
 public class Retailer {

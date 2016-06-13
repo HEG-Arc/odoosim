@@ -44,8 +44,6 @@ public class Demand {
     public void setOwner(Retailer owner) {
         this.owner = owner;
     }
-    
-    
 
     public void setId(int id) {
         this.id = id;

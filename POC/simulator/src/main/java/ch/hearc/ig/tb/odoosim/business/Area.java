@@ -1,7 +1,6 @@
 package ch.hearc.ig.tb.odoosim.business;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Area {
@@ -9,6 +8,10 @@ public class Area {
     private String name;
     private Double marketPart;
     private List<Retailer> consumers;
+    
+    public Area(String name) {
+        this.name = name;
+    }
     
     public Area(String name, Double marketPart) {
         this.name = name;
@@ -31,10 +34,6 @@ public class Area {
     public void setConsumers(List<Retailer> consumers) {
         this.consumers = consumers;
     }    
-
-    public Area(String name) {
-        this.name = name;
-    }
 
     public int getId() {
         return id;

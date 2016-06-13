@@ -1,23 +1,27 @@
 package ch.hearc.ig.tb.odoosim.business;
 
 import ch.hearc.ig.tb.odoosim.saasinterfacing.Odoo;
+import java.io.Serializable;
 import java.util.*;
 import static java.util.Arrays.asList;
 
 public class Company {
 
-    private Collection<Offer> offers;
-    private Collection<Exchange> exchanges;
     private int id;
     private String code;
     private String name;
     private String erp;
     private int uidapiaccess;
     private String passapiaccess;
+    private Integer idStock;
+    private Integer idAccountSaleProduct;
+    private Integer idJournalSaleProduct;
+    private Integer idAccountDebitors;
     private Collection<Collaborator> collaborators;
+    private Collection<Offer> offers;
+    private Collection<Exchange> exchanges;
     private Banker banker;
     private Shareholder shareholder;
-    private Integer idStock;
 
     public Company(String name) {
         this.name = name;
@@ -134,84 +138,154 @@ public class Company {
     public void setExchanges(Collection<Exchange> exchanges) {
         this.exchanges = exchanges;
     }
-    
-    public <T>void stockEntry(Odoo wsapi, Integer day, Integer month, Double quantity, List<T> products) {
+
+    public Integer getIdAccountSaleProduct() {
+        return idAccountSaleProduct;
+    }
+
+    public void setIdAccountSaleProduct(Integer idAccountSaleProduct) {
+        this.idAccountSaleProduct = idAccountSaleProduct;
+    }
+
+    public Integer getIdJournalSaleProduct() {
+        return idJournalSaleProduct;
+    }
+
+    public Integer getIdAccountDebitors() {
+        return idAccountDebitors;
+    }
+
+    public void setIdAccountDebitors(Integer idAccountDebitors) {
+        this.idAccountDebitors = idAccountDebitors;
+    }
+
+    public void setIdJournalSaleProduct(Integer idJournalSaleProduct) {
+        this.idJournalSaleProduct = idJournalSaleProduct;
+    }
+
+    public <T> void stockEntry(Odoo wsapi, String date, Double quantity, List<T> products) {
         List<Product> allProducts = (List<Product>) products;
-        for(Product product : allProducts) {
+        for (Product product : allProducts) {
             HashMap data = new HashMap();
-                    data.put("in_date", "2016-" + month + "-" + day + " 00:00:00");
-                    data.put("product_id", product.getId());
-                    data.put("qty", quantity);
-                    data.put("name", "Inventaire automatique pour " + product.getName());
-                    data.put("location_id", idStock);
-                    try {
-                        wsapi.insert(erp, "stock.quant", data, uidapiaccess, passapiaccess);
-                    } catch (Exception e) {
-                        System.out.println("Une erreur est survenue dans l'entrée de stock automatique");
-                    }
+            data.put("in_date", date);
+            data.put("product_id", product.getId());
+            data.put("qty", quantity);
+            data.put("name", "Inventaire automatique pour " + product.getName());
+            data.put("location_id", idStock);
+            try {
+                wsapi.insert(erp, "stock.quant", data, uidapiaccess, passapiaccess);
+            } catch (Exception e) {
+                System.out.println("Une erreur est survenue dans l'entrée de stock automatique");
+            }
         }
     }
-    
-    public void updateDateStock(Odoo wsapi, String sourceDocument, Integer day, Integer month, Integer year) throws Exception {
-        //  Terminer la sortie de stock
-        HashMap hm = new HashMap();
-        int picking = wsapi.getID(erp, "stock.picking", uidapiaccess, passapiaccess, asList(asList("origin", "=", sourceDocument)));
-        wsapi.update(erp, "stock.picking", uidapiaccess, passapiaccess, picking, new HashMap(){{ put("date", "2016-" + month + "-" + day + " 00:00:00");}});
+
+    public void updateDateStock(Odoo wsapi, Exchange ex) throws Exception {
+        int picking = wsapi.getID(erp, "stock.picking", uidapiaccess, passapiaccess, asList(asList("origin", "=", ex.getName())));
+        wsapi.update(erp, "stock.picking", uidapiaccess, passapiaccess, picking, new HashMap() {
+            {
+                put("date", ex.getDate());
+            }
+        });
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.picking", "do_new_transfer", picking);
         int immedia = wsapi.getID(erp, "stock.immediate.transfer", uidapiaccess, passapiaccess, asList(asList("pick_id", "=", picking)));
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.immediate.transfer", "process", immedia);
         //  get stock.pack.operation and update date (optimiser en récupérant uniquement le champ id
-        Object tuple = wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.pack.operation", asList(asList("picking_id", "=", picking)), 
-                new HashMap() {{ put("fields", Collections.emptyList());}});
-        hm = (HashMap) tuple;
-        wsapi.update(erp, "stock.pack.operation", uidapiaccess, passapiaccess, (int) hm.get("id"), 
-                new HashMap(){{ put("date", "2016-" + month + "-" + day + " 00:00:00");}});
+        Object tuple = wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.pack.operation", asList(asList("picking_id", "=", picking)),
+                new HashMap() {
+            {
+                put("fields", Collections.emptyList());
+            }
+        });
+        HashMap hm = (HashMap) tuple;
+        wsapi.update(erp, "stock.pack.operation", uidapiaccess, passapiaccess, (int) hm.get("id"),
+                new HashMap() {
+            {
+                put("date", ex.getDate());
+            }
+        });
         //  get stock.move and update date
-        Object move = wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.move", asList(asList("picking_id", "=", picking)), 
-                new HashMap() {{ put("fields", Collections.emptyList());}});
+        Object move = wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.move", asList(asList("picking_id", "=", picking)),
+                new HashMap() {
+            {
+                put("fields", Collections.emptyList());
+            }
+        });
         hm = (HashMap) move;
-           wsapi.update(erp, "stock.move", uidapiaccess, passapiaccess, (int) hm.get("id"), 
-                new HashMap(){{ put("date", "2016-" + month + "-" + day + " 00:00:00");}});
-        
-        
-        
+        wsapi.update(erp, "stock.move", uidapiaccess, passapiaccess, (int) hm.get("id"),
+                new HashMap() {
+            {
+                put("date", ex.getDate());
+            }
+        });
     }
-    
-    public void registerSale(Odoo wsapi, Exchange ex, int day, int month, Double accordingPrice) throws Exception{
-        
+
+    public void registerSale(Odoo wsapi, Exchange ex) throws Exception {
         HashMap d = new HashMap<String, Object>();
-        d.put("date_order", "2016-" + month + "-" + day + " 00:00:00");
+        d.put("date_order", ex.getDate());
         d.put("state", "sale");
-        d.put("partner_id", 7);
-        d.put("order_line", asList(asList(0, false, new HashMap<String, Object>() 
-            {{ put("product_id",ex.getProduct().getId()); put("product_uom_qty",ex.getQuantity());
-                put("price_unit", accordingPrice);}})));
-        int id = wsapi.insert(erp, "sale.order", d, uidapiaccess, passapiaccess);
-        HashMap name = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "sale.order", asList(asList("id", "=", id)), 
-                new HashMap() {{ put("fields", asList("name")); }});
-        updateDateStock(wsapi, (String) name.get("name"), day, month, 2016);
-        //registerDelivery(wsapi, (String) name.get("name"));
-        //registerInvoice(wsapi, (String) name.get("name"));
+        d.put("partner_id", ex.getBuyer().getId());
+        d.put("order_line", asList(asList(0, false, new HashMap<String, Object>() {
+            {
+                put("product_id", ex.getProduct().getId());
+                put("product_uom_qty", ex.getQuantity());
+                put("price_unit", ex.getPrice());
+            }
+        })));
+        ex.setId(wsapi.insert(erp, "sale.order", d, uidapiaccess, passapiaccess));
+        HashMap name = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "sale.order", asList(asList("id", "=", ex.getId())),
+                new HashMap() {
+            {
+                put("fields", asList("name"));
+            }
+        });
+        ex.setName((String) name.get("name"));
     }
-    
-    public void registerDelivery(Odoo wsapi, String sale) {
-        //  create_date=2016-06-10 06:29:05
-        //  availability=2209.0
-        
-        //  stock.picking see "move_lines => #1866 java.lang.Object[](length=1)"
-        int saleID = wsapi.getID(erp, "sale.order", uidapiaccess, passapiaccess, asList(asList("name", "=", sale)));
-        HashMap transfert = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "stock.picking", asList(asList("sale_id", "=", saleID)), 
-                    new HashMap() {{ put("fields", Collections.EMPTY_LIST); }});
-        System.out.println("Effectuer un bon de livraison");
-        try {
-            wsapi.update(erp, "", uidapiaccess, passapiaccess, (int) transfert.get("id"), new HashMap() {{ put("state", "done"); }});
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+
+    public void registerInvoice(Odoo wsapi, Exchange ex) throws Exception {
+        HashMap data = new HashMap();
+        data.put("state", "open");
+        data.put("partner_id", ex.getBuyer().getId());
+        data.put("origin", ex.getName());
+        data.put("account_id", idAccountDebitors);
+        data.put("invoice_line_ids", asList(asList(0, false, new HashMap() {
+            {
+                put("product_id", ex.getProduct().getId());
+                put("name", "Odoosim");
+                put("quantity", ex.getQuantity());
+                put("price_unit", ex.getPrice());
+                put("account_id", idAccountSaleProduct);
+            }
+        })));
+        ex.setIdInvoice(wsapi.insert(erp, "account.invoice", data, uidapiaccess, passapiaccess));
     }
-    
-    public void registerInvoice(Odoo wsapi, String sale) {
-        System.out.println("Enregistrerla facture !");
+
+    public void registerPayment(Odoo wsapi, Exchange ex) throws Exception {
+        HashMap payment = new HashMap();
+        payment.put("payment_type", "inbound");
+        payment.put("journal_id", idJournalSaleProduct);
+        payment.put("amount", ex.getPrice());
+        payment.put("partner_type", "customer");
+        payment.put("partner_id", ex.getBuyer().getId());
+        payment.put("payment_date", ex.getDate());
+        payment.put("invoice_ids", asList(asList(4, ex.getIdInvoice(), false)));
+        payment.put("payment_method_id", 1);
+
+        ex.setIdPayment(wsapi.insert(erp, "account.payment", payment, uidapiaccess, passapiaccess));
+    }
+
+    public void processSale(Odoo wsapi, Exchange ex) throws Exception {
+        registerSale(wsapi, ex);
+        updateDateStock(wsapi, ex);
+        registerInvoice(wsapi, ex);
+        registerPayment(wsapi, ex);
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "account.payment", "post", ex.getIdPayment());
+        wsapi.update(erp, "account.invoice", uidapiaccess, passapiaccess, ex.getIdInvoice(), new HashMap() {
+            {
+                put("state", "paid");
+            }
+        });
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", ex.getId());
     }
 
 }
