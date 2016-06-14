@@ -15,7 +15,7 @@
     </odoo>
     <companies>
         <company name="TEAM A">
-            <erp database="edu-odoosim-mda"/>
+            <erp database="edu-odoosim-teama-140616"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
                     <name>A. Tomat</name>
@@ -35,7 +35,7 @@
             </shareholder>
         </company>
         <company name="TEAM B">
-            <erp database="edu-odoosim-mdb"/>
+            <erp database="edu-odoosim-teamb-140616"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
                     <name>A. Tomat</name>
@@ -148,7 +148,7 @@
                     <name>Maltonne SA</name>
                 </supplier>
             </product_purchasable>
-            <product_sellable type="product" default_code="BW01A" list_price="2.00" standard_price="2.00" bestPrice="3.50">
+            <product_sellable type="product" default_code="BW01A" list_price="2.00" standard_price="2.00" bestPrice="3.85">
                 <name>Lager Beer 0.25</name>
                 <!-- Pour définir les quantités de chacune des matières premières, il faut se référer au document
                 de présentation du scénario et faire le rapport des 40 hectolitre = 400000 cl => 16'000 unité de 25
@@ -172,6 +172,7 @@
                     </product>
                 </bom>
             </product_sellable>
+            <!--
             <product_sellable type="product" default_code="BW01B" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Lager Beer 0.50</name>
                 <bom>
@@ -323,7 +324,7 @@
                         <name>Récipient format 50cl cannette d'aluminium</name>
                     </product>
                 </bom>
-            </product_sellable>
+            </product_sellable>-->
         </products>
         <markets baseVolumDemandDay="100000">
             <!-- La somme des attributs "part" de l'élément "market" doit valoir "100" (%) qui représente
@@ -331,7 +332,7 @@
             <market part="30.00">
                 <name>Suisse Est</name>
                 <retailers>
-                    <retailer type="groceries" number="8" payMin="5" payMax="10" part="20.00" elasticity="1.00">
+                    <retailer type="groceries" number="8" payMin="5" payMax="10" part="20.00" elasticity="-1.00">
                         <name>Détaillant N°</name>
                         <preferences>
                             <product>
@@ -345,7 +346,7 @@
                             </product>
                         </preferences>
                     </retailer>
-                    <retailer type="hypermarket" number="15" payMin="15" payMax="15" part="55.00" elasticity="0.20">
+                    <retailer type="hypermarket" number="15" payMin="15" payMax="15" part="55.00" elasticity="-0.20">
                         <name>Supermarché N°</name>
                         <preferences>
                             <product>
@@ -362,7 +363,7 @@
                             </product>
                         </preferences>
                     </retailer>
-                    <retailer type="other" number="27" payMin="8" payMax="12" part="25.00" elasticity="3.5">
+                    <retailer type="other" number="27" payMin="8" payMax="12" part="25.00" elasticity="-3.5">
                         <name>Etablissement public N°</name>
                         <preferences>
                             <product>
@@ -375,7 +376,7 @@
             <market part="20.00" elasticity="9.5" demandPartByCustomers="10">
                 <name>Suisse centrale</name>
                 <retailers>
-                    <retailer type="groceries" number="12" payMin="5" payMax="10" part="20.00" elasticity="2.45">
+                    <retailer type="groceries" number="12" payMin="5" payMax="10" part="20.00" elasticity="-2.45">
                         <name>Détaillant N°</name>
                         <preferences>
                             <product>
@@ -389,7 +390,7 @@
                             </product>
                         </preferences>
                     </retailer>
-                    <retailer type="hypermarket" number="17" payMin="15" payMax="15" part="55.00" elasticity="1.30">
+                    <retailer type="hypermarket" number="17" payMin="15" payMax="15" part="55.00" elasticity="-1.30">
                         <name>Supermarché N°</name>
                         <preferences>
                             <product>
@@ -406,7 +407,7 @@
                             </product>
                         </preferences>
                     </retailer>
-                    <retailer type="other" number="58" payMin="8" payMax="12" part="25.00" elasticity="2.90">
+                    <retailer type="other" number="58" payMin="8" payMax="12" part="25.00" elasticity="-2.90">
                         <name>Etablissement public N°</name>
                         <preferences>
                             <product>
@@ -419,7 +420,7 @@
             <market part="50.00" elasticity="6.9" demandPartByCustomers="9">
                 <name>Suisse Ouest</name>
                 <retailers>
-                    <retailer type="groceries" number="23" payMin="5" payMax="10" part="20.00" elasticity="2.20">
+                    <retailer type="groceries" number="23" payMin="5" payMax="10" part="20.00" elasticity="-2.20">
                         <name>Détaillant N°</name>
                         <preferences>
                             <product>
@@ -433,7 +434,7 @@
                             </product>
                         </preferences>
                     </retailer>
-                    <retailer type="hypermarket" number="11" payMin="15" payMax="15" part="55.00" elasticity="0.80">
+                    <retailer type="hypermarket" number="11" payMin="15" payMax="15" part="55.00" elasticity="-0.80">
                         <name>Supermarché N°</name>
                         <preferences>
                             <product>
@@ -450,7 +451,7 @@
                             </product>
                         </preferences>
                     </retailer>
-                    <retailer type="other" number="49" payMin="8" payMax="12" part="25.00" elasticity="3.50">
+                    <retailer type="other" number="49" payMin="8" payMax="12" part="25.00" elasticity="-3.50">
                         <name>Etablissement public N°</name>
                         <preferences>
                             <product>

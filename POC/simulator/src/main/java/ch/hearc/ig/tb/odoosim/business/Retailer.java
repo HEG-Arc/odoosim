@@ -118,21 +118,12 @@ public class Retailer {
     }
 
     public Double getAdjustedQuantity(Demand d, Offer o) {
-
-        if (elasticity > 0) {
-            elasticity = elasticity * -1;
-        }
-
-        Double optimum = d.getProduct().getCustomerBestPrice();
         Double offerPrice = o.getPrice();
-
+        Double optimum = d.getProduct().getCustomerBestPrice();
+        Double qtyRequest = d.getQuantity();
         Double variationPrice = (offerPrice - optimum) / optimum;
-
-        Double variationQuantity = variationPrice * elasticity;
-
-        Double resultat = (variationQuantity / 100) * d.getQuantity() + d.getQuantity();
-
-        return (double) Math.round(resultat);
+        Double qtyNew = (((variationPrice*100)*elasticity)/qtyRequest)*qtyRequest-qtyRequest*-1;
+        return (double) Math.round(qtyNew);
     }
 
 }
