@@ -167,7 +167,7 @@ public class Company {
         List<Product> allProducts = (List<Product>) products;
         for (Product product : allProducts) {
             HashMap data = new HashMap();
-            data.put("in_date", date);
+            data.put("in_date", date + " 00:00:00");
             data.put("product_id", product.getId());
             data.put("qty", quantity);
             data.put("name", "Inventaire automatique pour " + product.getName());
@@ -184,7 +184,7 @@ public class Company {
         int picking = wsapi.getID(erp, "stock.picking", uidapiaccess, passapiaccess, asList(asList("origin", "=", ex.getName())));
         wsapi.update(erp, "stock.picking", uidapiaccess, passapiaccess, picking, new HashMap() {
             {
-                put("date", ex.getDate());
+                put("date", ex.getDate() + " 00:00:00");
             }
         });
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.picking", "do_new_transfer", picking);
@@ -201,7 +201,7 @@ public class Company {
         wsapi.update(erp, "stock.pack.operation", uidapiaccess, passapiaccess, (int) hm.get("id"),
                 new HashMap() {
             {
-                put("date", ex.getDate());
+                put("date", ex.getDate() + " 00:00:00");
             }
         });
         //  get stock.move and update date
@@ -215,14 +215,14 @@ public class Company {
         wsapi.update(erp, "stock.move", uidapiaccess, passapiaccess, (int) hm.get("id"),
                 new HashMap() {
             {
-                put("date", ex.getDate());
+                put("date", ex.getDate() + " 00:00:00");
             }
         });
     }
 
     public void registerSale(Odoo wsapi, Exchange ex) throws Exception {
         HashMap d = new HashMap<String, Object>();
-        d.put("date_order", ex.getDate());
+        d.put("date_order", ex.getDate() + " 00:00:00");
         d.put("state", "sale");
         d.put("partner_id", ex.getBuyer().getId());
         d.put("order_line", asList(asList(0, false, new HashMap<String, Object>() {
@@ -248,6 +248,8 @@ public class Company {
         data.put("partner_id", ex.getBuyer().getId());
         data.put("origin", ex.getName());
         data.put("account_id", idAccountDebitors);
+        data.put("date", ex.getDate());
+        data.put("date_invoice", ex.getDate());
         data.put("invoice_line_ids", asList(asList(0, false, new HashMap() {
             {
                 put("product_id", ex.getProduct().getId());
@@ -267,7 +269,7 @@ public class Company {
         payment.put("amount", ex.getPrice());
         payment.put("partner_type", "customer");
         payment.put("partner_id", ex.getBuyer().getId());
-        payment.put("payment_date", ex.getDate());
+        payment.put("payment_date", ex.getDate() + " 00:00:00");
         payment.put("invoice_ids", asList(asList(4, ex.getIdInvoice(), false)));
         payment.put("payment_method_id", 1);
 

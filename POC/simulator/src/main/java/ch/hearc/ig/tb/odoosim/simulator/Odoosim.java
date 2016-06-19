@@ -104,7 +104,10 @@ public class Odoosim {
             //  Très important, c'est de cette date que tous les enregistrements
             //  vers Odoo sont fait!
             int year = Calendar.getInstance().get(Calendar.YEAR);
-            String date = year + "-" + month + "-" + day + " 00:00:00";
+            // Avant
+            //String date = year + "-" + month + "-" + day + " 00:00:00";
+            // Maintenant
+            String date = year + "-" + month + "-" + day;
 
             long before = System.currentTimeMillis();
             System.out.println("\n\r" + date + " (1 jour simulés en " + (daysDuration) + " secondes)\n\r");

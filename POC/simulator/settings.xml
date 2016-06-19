@@ -15,27 +15,7 @@
     </odoo>
     <companies>
         <company name="TEAM A">
-            <erp database="edu-odoosim-teama-140616"/>
-            <players>
-                <player login="anthony.tomat@gmail.com">
-                    <name>A. Tomat</name>
-                    <roles>
-                        <role>
-                            <name>Sales</name>
-                            <value>Manager</value>
-                        </role>
-                    </roles>
-                </player>
-            </players>
-            <bank>
-                <name>VUBS SA</name>
-            </bank>
-            <shareholder>
-                <name>Breweries Holding Corp.</name>
-            </shareholder>
-        </company>
-        <company name="TEAM B">
-            <erp database="edu-odoosim-teamb-140616"/>
+            <erp database="edu-odoosim-template-breweryandco"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
                     <name>A. Tomat</name>
@@ -172,7 +152,6 @@
                     </product>
                 </bom>
             </product_sellable>
-            <!--
             <product_sellable type="product" default_code="BW01B" list_price="2.00" standard_price="2.00" bestPrice="3.50">
                 <name>Lager Beer 0.50</name>
                 <bom>
@@ -324,7 +303,7 @@
                         <name>Récipient format 50cl cannette d'aluminium</name>
                     </product>
                 </bom>
-            </product_sellable>-->
+            </product_sellable>
         </products>
         <markets baseVolumDemandDay="100000">
             <!-- La somme des attributs "part" de l'élément "market" doit valoir "100" (%) qui représente

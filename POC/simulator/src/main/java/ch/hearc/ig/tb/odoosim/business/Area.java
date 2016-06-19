@@ -52,7 +52,11 @@ public class Area {
     }
 
     public void addConsumer(Retailer c) {
-        c.setLocalisation(this);
-        consumers.add(c);
+        try {
+            c.setLocalisation(this);
+            consumers.add(c);
+        } catch (Exception e) {
+            
+        }
     }
 }

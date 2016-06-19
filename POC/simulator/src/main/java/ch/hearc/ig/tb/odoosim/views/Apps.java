@@ -23,7 +23,7 @@ public class Apps {
         } catch (Exception e) { writeLn(typeOfMessage.ERROR, e.getMessage()); }
         try {
             writeLn(typeOfMessage.INFO, "Démarrage du jeu", true);
-            odoosimulator.processingGame();
+            //odoosimulator.processingGame();
         } catch (Exception e) { writeLn(typeOfMessage.ERROR, e.getMessage()); }
         try {
             writeLn(typeOfMessage.INFO, "Historisation des données générées");
