@@ -15,7 +15,7 @@
     </odoo>
     <companies>
         <company name="TEAM A">
-            <erp database="edu-odoosim-template-breweryandco"/>
+            <erp database="edu-odoosim-finish"/>
             <players>
                 <player login="anthony.tomat@gmail.com">
                     <name>A. Tomat</name>
@@ -44,7 +44,7 @@
             <contact company_type="company" customer="false" supplier="false" type="shareholder">Breweries Holding Corp.</contact>
         </contacts>
         <products>
-            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="00.0015">
+            <product_purchasable type="product" default_code="" list_price="0.00" standard_price="00.15">
                 <name>Eau traitée</name>
                 <startQuantity>1000</startQuantity>
                 <supplier>
