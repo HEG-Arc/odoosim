@@ -1,0 +1,25 @@
+
+//  Activité PR02 et PR03
+
+liste_des_OA_encours = "search_read" sur le modèle "purchase.order", avec le critère state = "purchase";
+
+Boucle(OA : liste_des_OA_encours) {
+
+    Si (OA.__last_update est plus vieux ou égal à (dateVirtuelle - délai d'approvisionnemet)) {
+        "write" sur le modèle "purchase.order" avec le critère id=OA.id et valeur à modifier (state="done");
+        
+    }
+}
+
+
+
+//  Activité MA02
+
+liste_des_OF_encours = "search_read" sur le modèle "mrp.production", avec le critère state="in_production", une limite de 3 tuples, avec un tri croissant sur date_start;
+
+Boucle (OF : liste_des_OF_encours) {
+
+    Si (OF.date_start est plus vieux ou égal à (dateVirtuelle - temps de production)) {
+        "write" sur le modèle "mrp.production" avec le critère id=OF.id valeur à modifier (state="done");
+    }
+}
