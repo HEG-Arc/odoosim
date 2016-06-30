@@ -15,9 +15,9 @@
     </odoo>
     <companies>
         <company name="TEAM A">
-            <erp database="edu-odoosim-finish"/>
+            <erp database="edu-testingaccounting"/>
             <players>
-                <player login="anthony.tomat@gmail.com">
+                <player login="anthony.tomat881215@mailinator.com">
                     <name>A. Tomat</name>
                     <roles>
                         <role>
@@ -37,11 +37,11 @@
     </companies>
     <scenario>
         <contacts>
-            <contact company_type="company" customer="false" supplier="true" type="supplier">Maltonne SA</contact>
-            <contact company_type="company" customer="false" supplier="true" type="supplier">Ourseau SA</contact>
-            <contact company_type="company" customer="false" supplier="true" type="supplier">Monsieur Ture</contact>
-            <contact company_type="company" customer="false" supplier="false" type="banker">VUBS SA</contact>
-            <contact company_type="company" customer="false" supplier="false" type="shareholder">Breweries Holding Corp.</contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier" leadtime="15"><name>Maltonne SA</name></contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier" leadtime="15"><name>Ourseau SA</name></contact>
+            <contact company_type="company" customer="false" supplier="true" type="supplier" leadtime="10"><name>Monsieur Ture</name></contact>
+            <contact company_type="company" customer="false" supplier="false" type="banker"><name>VUBS SA</name></contact>
+            <contact company_type="company" customer="false" supplier="false" type="shareholder"><name>Breweries Holding Corp.</name></contact>
         </contacts>
         <products>
             <product_purchasable type="product" default_code="" list_price="0.00" standard_price="00.15">
@@ -306,8 +306,6 @@
             </product_sellable>
         </products>
         <markets baseVolumDemandDay="100000">
-            <!-- La somme des attributs "part" de l'élément "market" doit valoir "100" (%) qui représente
-            les parts de marché pour une région donnée-->
             <market part="30.00">
                 <name>Suisse Est</name>
                 <retailers>
@@ -522,7 +520,7 @@
     </scenario>
     <settings>
         <simulation>
-            <round qty="2">
+            <round qty="1">
                 <day durationSeconds="10">
                     <number>10</number>
                 </day>

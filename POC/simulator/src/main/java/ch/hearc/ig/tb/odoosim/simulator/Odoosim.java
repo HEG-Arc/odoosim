@@ -333,21 +333,23 @@ public class Odoosim {
     }
 
     public void generateStakeholders() throws Exception {
-        List<String> shareholders = getDataXML(scenario, "//contact[@type='shareholder']");
+        List<String> shareholders = getDataXML(scenario, "//contact[@type='shareholder']/name");
         for (int i = 0; i < shareholders.size(); i++) {
             Shareholder shareholder = new Shareholder(shareholders.get(i));
             this.shareholders.add(shareholder);
         }
 
-        List<String> bankers = getDataXML(scenario, "//contact[@type='banker']");
+        List<String> bankers = getDataXML(scenario, "//contact[@type='banker']/name");
         for (int i = 0; i < bankers.size(); i++) {
             Banker banker = new Banker(bankers.get(i));
             this.bankers.add(banker);
         }
 
-        List<String> suppliers = getDataXML(scenario, "//contact[@type='supplier']");
+        List<String> suppliers = getDataXML(scenario, "//contact[@type='supplier']/name");
         for (int i = 0; i < suppliers.size(); i++) {
+            
             Supplier supplier = new Supplier(suppliers.get(i));
+            supplier.setLeadTime(Integer.parseInt(getDataXML(scenario, "//contact[name='"+suppliers.get(i)+"']/@leadtime").get(0)));
             this.suppliers.add(supplier);
         }
     }
@@ -486,7 +488,9 @@ public class Odoosim {
     }
 
     public void createMasterDataRawMaterials(Company c) throws Exception {
-
+        
+        Integer routeMTO = wsapi.getID(c.getErp(), "stock.location.route", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", "Make To Order")));
+        Integer routeBuy = wsapi.getID(c.getErp(), "stock.location.route", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", "Buy")));
         for (Rawmaterial rm : rawMaterials) {
             int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", rm.getName()),
                     asList("type", "=", "product")));
@@ -499,8 +503,10 @@ public class Odoosim {
                 data.put("standard_price", rm.getPurchasePrice());
                 data.put("sale_ok", false);
                 data.put("purchase_ok", true);
+                data.put("route_ids", asList(asList(4, routeMTO, false), asList(4, routeBuy, false)));
                 data.put("seller_ids", asList(asList(0, false, new HashMap<String, Object>() {
                     {
+                        put("delay", rm.getSupplier().getLeadTime());
                         put("name", rm.getSupplier().getId());
                         put("min_qty", 1.00);
                         put("price", rm.getPurchasePrice());
@@ -514,7 +520,7 @@ public class Odoosim {
     }
 
     public void createMasterDataProduct(Company c) throws Exception {
-
+        Integer routeMTS = wsapi.getID(c.getErp(), "stock.location.route", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", "Manufacture")));
         for (Good gd : products) {
             int exist = wsapi.getID(c.getErp(), "product.template", c.getUidapiaccess(), passworOdoo, asList(asList("name", "=", gd.getName()),
                     asList("type", "=", "product"), asList("default_code", "=", gd.getCode())));
@@ -527,6 +533,7 @@ public class Odoosim {
                 data.put("standard_price", gd.getPurchasePrice());
                 data.put("sale_ok", true);
                 data.put("purchase_ok", false);
+                data.put("route_ids", asList(asList(4, routeMTS, false)));
                 gd.setId(wsapi.insert(c.getErp(), "product.template", data, c.getUidapiaccess(), passworOdoo));
             } else {
                 gd.setId(exist);

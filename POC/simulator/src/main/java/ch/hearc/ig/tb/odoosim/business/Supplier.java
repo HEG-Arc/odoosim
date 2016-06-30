@@ -6,6 +6,7 @@ public class Supplier {
     
     private int id;
     private String name;
+    private Integer leadTime;
 
     public Supplier(String name) {
         this.name = name;
@@ -26,6 +27,15 @@ public class Supplier {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Integer getLeadTime() {
+        return leadTime;
+    }
+
+    public void setLeadTime(Integer leadTime) {
+        this.leadTime = leadTime;
+    }
+    
     @Override
     public int hashCode() {
         return Objects.hash(this.name);
