@@ -112,7 +112,7 @@ public class Retailer {
     }
 
     public void addExchange(Exchange ex) {
-        Company c = ex.getVendor();
+        Company c = ex.getVendor().getOwner();
         c.addExchange(ex);
         exchanges.add(ex);
     }

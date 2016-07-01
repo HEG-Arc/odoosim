@@ -312,6 +312,8 @@ public class Odoosim {
                     asList(asList("name", "=", getDataXML(scenario, "//defaultsales/journalPayment").get(0)))));
             c.setIdAccountDebitors((Integer) wsapi.getID(c.getErp(), "account.account", c.getUidapiaccess(), c.getPassapiaccess(),
                     asList(asList("code", "=", getDataXML(scenario, "//defaultsales/accountDebitors").get(0)))));
+            c.setIdBankAccount((Integer) wsapi.getID(c.getErp(), "account.account", c.getUidapiaccess(), c.getPassapiaccess(),
+                    asList(asList("code", "=", 10201))));
             this.companies.add(c);
         }
     }

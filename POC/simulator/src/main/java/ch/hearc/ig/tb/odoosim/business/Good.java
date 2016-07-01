@@ -103,16 +103,17 @@ public class Good extends Product {
                         if(qty>1) {
                             if (qty > offer.getQuantity()) {
                                 
-                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand.getOwner(), 
-                                        offer.getOwner(), this, date);
+                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand, 
+                                        offer, this, date);
                                 //demand.getOwner().addExchange(ex);
                                 demand.setQuantity(demand.getQuantity() - offer.getQuantity());
                                 offer.setQuantity(offer.getQuantity() - offer.getQuantity());
-                                offer.getOwner().processSale(wsapi, ex);                                
+                                //offer.getOwner().processSale(wsapi, ex);   
+                                offer.getOwner().processQuickSale2(wsapi, ex);  
                             } else if (qty <= offer.getQuantity()) {
                                 
-                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand.getOwner(), 
-                                        offer.getOwner(), this, date);
+                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand, 
+                                        offer, this, date);
                                 //demand.getOwner().addExchange(ex);
                                 //  Je met à 0.0 car vu que l'offre est triée sur le prix, cela n'aurait pas de sens
                                 //  d'aller voir chez un autre fournisseur qui sera de toute manière plus chère.
@@ -120,7 +121,7 @@ public class Good extends Product {
                                 //  a contraint le consommateur à faire un trait sur une partie de ses besoins.
                                 demand.setQuantity(0.0);
                                 offer.setQuantity(offer.getQuantity() - qty);
-                                offer.getOwner().processSale(wsapi, ex);
+                                offer.getOwner().processQuickSale2(wsapi, ex); 
                                 break;
                             }
                         } else {

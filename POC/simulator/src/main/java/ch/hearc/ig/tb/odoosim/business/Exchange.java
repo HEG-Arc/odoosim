@@ -5,8 +5,8 @@ public class Exchange {
     private int id;
     private Double quantity;
     private Double price;
-    private Company vendor;
-    private Retailer buyer;
+    private Offer vendor;
+    private Demand buyer;
     private Good product;
     private String name;
     private String date;
@@ -16,7 +16,7 @@ public class Exchange {
     public Exchange() {
     }
     
-    public Exchange(Double quantity,Double price, Retailer buyer, Company vendor, Good product, String date) {
+    public Exchange(Double quantity,Double price, Demand buyer, Offer vendor, Good product, String date) {
         this.quantity = quantity;
         this.price = price;
         this.vendor = vendor;
@@ -49,19 +49,19 @@ public class Exchange {
         this.price = price;
     }
 
-    public Company getVendor() {
+    public Offer getVendor() {
         return vendor;
     }
 
-    public void setVendor(Company vendor) {
+    public void setVendor(Offer vendor) {
         this.vendor = vendor;
     }
 
-    public Retailer getBuyer() {
+    public Demand getBuyer() {
         return buyer;
     }
 
-    public void setBuyer(Retailer buyer) {
+    public void setBuyer(Demand buyer) {
         this.buyer = buyer;
     }
 

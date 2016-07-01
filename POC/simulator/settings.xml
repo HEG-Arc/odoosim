@@ -15,7 +15,7 @@
     </odoo>
     <companies>
         <company name="TEAM A">
-            <erp database="edu-testingaccounting"/>
+            <erp database="edu-saleeffect"/>
             <players>
                 <player login="anthony.tomat881215@mailinator.com">
                     <name>A. Tomat</name>

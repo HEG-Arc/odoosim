@@ -53,15 +53,21 @@ public class Odoo {
         return (Integer) object.execute("execute_kw", asList(database, uid, password, model, "search_count", asList(criteria)));
     }
     
-    public void changeState(String database, Integer uid, String password, String model, String action, Integer id) {
+    public void update2(String database, int uid, String password, String model, String action, int tupleId, HashMap fields) throws Exception {
+        setConfiguration(2, database);
+        object.setConfig(configuration);
+        object.execute("execute_kw", asList(database, uid, password, model, action, asList(asList(tupleId), fields)));
+    }
+    
+    public HashMap changeState(String database, Integer uid, String password, String model, String action, Integer id) {
         try {
             setConfiguration(2, database);
             object.setConfig(configuration);
-            object.execute("execute_kw", asList(
+            return (HashMap) object.execute("execute_kw", asList(
                                 database, uid, password,
                                 model, action, asList(asList(id))));
         } catch (Exception e) {
-            //loguer qqch
+            return null;
         }
     }
 

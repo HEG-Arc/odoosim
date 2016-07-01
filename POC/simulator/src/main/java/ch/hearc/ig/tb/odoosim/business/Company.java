@@ -17,6 +17,7 @@ public class Company {
     private Integer idAccountSaleProduct;
     private Integer idJournalSaleProduct;
     private Integer idAccountDebitors;
+    private Integer idBankAccount;
     private Collection<Collaborator> collaborators;
     private Collection<Offer> offers;
     private Collection<Exchange> exchanges;
@@ -52,6 +53,14 @@ public class Company {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getIdBankAccount() {
+        return idBankAccount;
+    }
+
+    public void setIdBankAccount(Integer idBankAccount) {
+        this.idBankAccount = idBankAccount;
     }
 
     public Collection<Offer> getOffers() {
@@ -224,7 +233,7 @@ public class Company {
         HashMap d = new HashMap<String, Object>();
         d.put("date_order", ex.getDate() + " 00:00:00");
         d.put("state", "sale");
-        d.put("partner_id", ex.getBuyer().getId());
+        d.put("partner_id", ex.getBuyer().getOwner().getId());
         d.put("order_line", asList(asList(0, false, new HashMap<String, Object>() {
             {
                 put("product_id", ex.getProduct().getId());
@@ -245,7 +254,7 @@ public class Company {
     public void registerInvoice(Odoo wsapi, Exchange ex) throws Exception {
         HashMap data = new HashMap();
         data.put("state", "open");
-        data.put("partner_id", ex.getBuyer().getId());
+        data.put("partner_id", ex.getBuyer().getOwner().getId());
         data.put("origin", ex.getName());
         data.put("account_id", idAccountDebitors);
         data.put("date", ex.getDate());
@@ -268,7 +277,7 @@ public class Company {
         payment.put("journal_id", idJournalSaleProduct);
         payment.put("amount", ex.getPrice());
         payment.put("partner_type", "customer");
-        payment.put("partner_id", ex.getBuyer().getId());
+        payment.put("partner_id", ex.getBuyer().getOwner().getId());
         payment.put("payment_date", ex.getDate() + " 00:00:00");
         payment.put("invoice_ids", asList(asList(4, ex.getIdInvoice(), false)));
         payment.put("payment_method_id", 1);
@@ -288,6 +297,135 @@ public class Company {
             }
         });
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", ex.getId());
+    }
+    
+    public void processQuickSale(Odoo wsapi, Exchange ex) throws Exception {
+        HashMap data = new HashMap<>();
+        data.put("date_order", ex.getDate() + " 00:00:00");
+        data.put("state", "sale");
+        data.put("partner_id", ex.getBuyer().getOwner().getId());
+        data.put("order_line", asList(asList(0, false, new HashMap<String, Object>() {
+            {
+                put("product_id", ex.getProduct().getId());
+                put("product_uom_qty", ex.getQuantity());
+                put("price_unit", ex.getPrice());
+            }
+        })));
+        ex.setId(wsapi.insert(erp, "sale.order", data, uidapiaccess, passapiaccess));
+        
+        data.clear();
+        data = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "sale.order", asList(asList("id", "=", ex.getId())),
+                new HashMap() {
+            {
+                put("fields", asList("name","amount_total"));
+            }
+        });
+        ex.setName((String) data.get("name"));
+        Double amount = (Double) data.get("amount_total");
+        
+        data.clear();
+        data.put("product_id", ex.getProduct().getId());
+        data.put("product_tmpl_id", ex.getProduct().getId());
+        data.put("new_quantity", ex.getVendor().getQuantity());
+        data.put("location_id", idStock);
+        data.put("product_variant_count", 1);
+        wsapi.insert(erp, "stock.change.product.qty", data, uidapiaccess, passapiaccess);
+      
+        data.clear();
+        //  Fonctionne bien! Essayer de reproduire les deux entreés dans le journal avec le compte 1100 débiteur comme sur les feuilles papier
+        //  Ne pas oublier de post le paiement ! 
+        data.put("journal_id", idJournalSaleProduct);
+        data.put("date", ex.getDate());
+        data.put("line_ids", asList(asList(0, false, new HashMap<String, Object>() {
+            {
+                put("account_id", idAccountSaleProduct);
+                put("debit", 0.0);
+                put("credit", amount);
+                put("quantity", ex.getQuantity());
+                put("date_maturity", ex.getDate());
+                put("move_id", 1);
+                put("name", "Auto-Sales Odoosim");
+                put("partner_id", ex.getBuyer().getOwner().getId());
+            }
+        }), asList(0, false, new HashMap<String, Object>() {
+            {
+                put("account_id", idBankAccount);
+                put("debit", amount);
+                put("credit", 0.0);
+                put("quantity", ex.getQuantity());
+                put("date_maturity", ex.getDate());
+                put("move_id", 1);
+                put("name", "Auto-Sales Odoosim");
+                put("partner_id", ex.getBuyer().getOwner().getId());
+            }
+        })));
+        //  Récupéré l'id puis faire l'action POST! poru que la transaction soit comptabilisée!
+        wsapi.insert(erp, "account.move", data, uidapiaccess, passapiaccess);
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", ex.getId());
+        //  La partie ci-dessus la faire à ce moment là et avant faire la transaction avec le compte 3200 vente marchandise avec 1100 débiteur
+    }
+    
+    public void processQuickSale2(Odoo wsapi, Exchange ex) throws Exception {
+        long start = System.currentTimeMillis();
+        //  Création de la vente
+        HashMap d = new HashMap<>();
+        d.put("state", "sale");
+        d.put("date_order", ex.getDate() + " 00:00:00");
+        d.put("partner_id", ex.getBuyer().getOwner().getId());
+        d.put("picking_policy","direct");
+        d.put("order_line", asList(asList(0, false, new HashMap<String, Object>() {
+            {
+                put("product_id", ex.getProduct().getId());
+                put("product_uom_qty", ex.getQuantity());
+                put("price_unit", ex.getPrice());
+                put("tax_id", asList(asList(6, false, asList(14))));
+            }
+        })));
+        int idSale = wsapi.insert(erp,"sale.order",d,uidapiaccess,passapiaccess);
+        //pas besoin wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_confirm", idSale);
+        HashMap changeState = wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_view_delivery", idSale);
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.picking", "do_new_transfer", (int) changeState.get("res_id"));
+        int id = wsapi.getID(erp, "stock.immediate.transfer", uidapiaccess, passapiaccess, asList(asList("pick_id", "=", changeState.get("res_id"))));
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.immediate.transfer", "process", id);
+        d.clear();
+        d.put("advance_payment_method", "all");
+        d.put("amount", 0);
+        d.put("deposit_account_id", false);
+        d.put("product_id", false);
+        int insert = wsapi.insert(erp,"sale.advance.payment.inv",d,uidapiaccess,passapiaccess);
+        d.clear();
+        d.put("active_id", idSale);
+        d.put("active_ids", asList(idSale));
+        d.put("active_model", "sale.order");
+        d.put("search_disable_custom_filters", true);
+        wsapi.update2(erp, uidapiaccess, passapiaccess, "sale.advance.payment.inv", "create_invoices", insert, d);
+        HashMap invoices = wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_view_invoice", idSale);
+        int idInvoice = (int) invoices.get("res_id");
+        //wsapi.getTuple(erp, uidapiaccess, passapiaccess, "account.invoice", asList(asList("id", "=", ex.getId())), d)
+        wsapi.workflowProgress(erp, uidapiaccess, passapiaccess, "account.invoice", "invoice_open", idInvoice);
+          System.out.println("Avant le paiement");
+          d.clear();
+          d.put("amount", (ex.getQuantity()*ex.getPrice())); //faire qty * prix !
+          d.put("communication", "Effectué par le simulateur ODOOSIM");
+          d.put("journal_id", idJournalSaleProduct); // Bank
+          d.put("partner_id", ex.getBuyer().getOwner().getId()); //celui du client !
+          d.put("partner_type","customer");
+          d.put("payment_date", ex.getDate() + " 00:00:00");
+          d.put("payment_difference_handling","open");
+          d.put("payment_method_id",1);
+          d.put("payment_type","inbound");
+          d.put("writeoff_account_id",false);
+          d.put("invoice_ids", asList(asList(4, idInvoice, false)));
+          int idPayment = wsapi.insert(erp,"account.payment",d,uidapiaccess,passapiaccess);
+          d.clear();
+          d.put("active_id", idInvoice);
+          d.put("active_ids", asList(idInvoice));
+            d.put("active_model", "account.invoice");
+          wsapi.changeState(erp, uidapiaccess, passapiaccess, "account.payment", "post", idPayment);
+          wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", idSale);
+          long end = System.currentTimeMillis();
+          
+          System.out.println("TEMPS PROCESS SALE : " + (end-start));
     }
 
 }
