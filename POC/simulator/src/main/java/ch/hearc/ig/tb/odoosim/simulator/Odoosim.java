@@ -8,6 +8,8 @@ import org.w3c.dom.Document;
 import static ch.hearc.ig.tb.odoosim.utilities.Utility.*;
 import static java.util.Arrays.asList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -110,53 +112,53 @@ public class Odoosim {
             String date = year + "-" + month + "-" + day;
 
             long before = System.currentTimeMillis();
-            System.out.println("\n\r" + date + " (1 jour simulés en " + (daysDuration) + " secondes)\n\r");
+            System.out.println("\n\rSimulation du jour " + day + " au " + date);
 
             for (Good good : products) {
                 good.getDemands().clear();
                 good.getVendors().clear();
             }
 
-            long bO = System.currentTimeMillis();
+            //long bO = System.currentTimeMillis();
 
             for (Area area : areas) {
                 generateDemand(area.getConsumers());
             }
 
-            long aO = System.currentTimeMillis();
+            //long aO = System.currentTimeMillis();
 
-            System.out.println("Temps de génération de la demande = " + ((aO - bO) / 1000) + " -> QTY : " + PKI_quantity_demands + "/VOL : " + PKI_volum_demands);
+            //System.out.println("Temps de génération de la demande = " + ((aO - bO) / 1000) + " -> QTY : " + PKI_quantity_demands + "/VOL : " + PKI_volum_demands);
 
-            bO = System.currentTimeMillis();
+            //bO = System.currentTimeMillis();
 
             for (Company company : companies) {
                 company.stockEntry(wsapi, date, renewalStockQuantity, products);
                 generateOffers(company);
             }
 
-            aO = System.currentTimeMillis();
+            //aO = System.currentTimeMillis();
 
-            System.out.println("Temps de génération de l'offre = " + ((aO - bO) / 1000) + " -> QTY : " + PKI_quantity_offers + "/VOL : " + PKI_volum_offers);
+            //System.out.println("Temps de génération de l'offre = " + ((aO - bO) / 1000) + " -> QTY : " + PKI_quantity_offers + "/VOL : " + PKI_volum_offers);
 
-            bO = System.currentTimeMillis();
+            //bO = System.currentTimeMillis();
 
             for (Good product : products) {
                 product.oadApplication(wsapi, date);
             }
 
-            aO = System.currentTimeMillis();
+            //aO = System.currentTimeMillis();
 
-            System.out.println("Temps de l'algo O&D = " + ((aO - bO) / 1000));
+            //System.out.println("Temps de l'algo O&D = " + ((aO - bO) / 1000));
 
             long after = System.currentTimeMillis();
 
             day++;
 
-            System.out.println("Temps des opérations : " + (after - before));
+            //System.out.println("Temps des opérations : " + (after - before));
             //  Au cas où les opérations ont été anormalements longues, nous ne faisons pas l'attente et enchaînons directement
             long waiting = (daysDuration * 1000) - (after - before);
-            System.out.println("Temps d'attente : " + waiting);
-            System.out.println("Transaction durant le round => " + PKI_volum_transactions);
+            //System.out.println("Temps d'attente : " + waiting);
+            //System.out.println("Transaction durant le round => " + PKI_volum_transactions);
 
             if (waiting > 0) {
                 Thread.sleep(waiting);
@@ -171,7 +173,11 @@ public class Odoosim {
 
     public void persistDataGame() throws Exception {
         //  Récupération des données générées et persistence (DB ou File)
-        throw new Exception("Phase du jeu non-disponible actuellement");
+        Collections.sort(companies);
+        Integer ranking = 1;
+        for (Company c : companies) {
+            System.out.println(ranking + ") Equipe " + c.getName() + " avec un chiffre d'affaires de " + c.getCa() + " CHF");
+        }
     }
 
     public void getSettingsXML() throws Exception {

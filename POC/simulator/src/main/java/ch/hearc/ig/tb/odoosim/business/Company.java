@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.*;
 import static java.util.Arrays.asList;
 
-public class Company {
+public class Company  implements Comparable<Company> {
 
     private int id;
     private String code;
@@ -23,12 +23,14 @@ public class Company {
     private Collection<Exchange> exchanges;
     private Banker banker;
     private Shareholder shareholder;
+    private Double ca;
 
     public Company(String name) {
         this.name = name;
         this.collaborators = new ArrayList<>();
         this.offers = new ArrayList<>();
         this.exchanges = new ArrayList<>();
+        this.ca = 0.0;
     }
 
     public int getId() {
@@ -61,6 +63,14 @@ public class Company {
 
     public void setIdBankAccount(Integer idBankAccount) {
         this.idBankAccount = idBankAccount;
+    }
+
+    public Double getCa() {
+        return ca;
+    }
+
+    public void setCa(Double ca) {
+        this.ca = ca;
     }
 
     public Collection<Offer> getOffers() {
@@ -366,7 +376,7 @@ public class Company {
     }
     
     public void processQuickSale2(Odoo wsapi, Exchange ex) throws Exception {
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         //  Création de la vente
         HashMap d = new HashMap<>();
         d.put("state", "sale");
@@ -403,7 +413,7 @@ public class Company {
         int idInvoice = (int) invoices.get("res_id");
         //wsapi.getTuple(erp, uidapiaccess, passapiaccess, "account.invoice", asList(asList("id", "=", ex.getId())), d)
         wsapi.workflowProgress(erp, uidapiaccess, passapiaccess, "account.invoice", "invoice_open", idInvoice);
-          System.out.println("Avant le paiement");
+          //System.out.println("Avant le paiement");
           d.clear();
           d.put("amount", (ex.getQuantity()*ex.getPrice())); //faire qty * prix !
           d.put("communication", "Effectué par le simulateur ODOOSIM");
@@ -423,9 +433,21 @@ public class Company {
             d.put("active_model", "account.invoice");
           wsapi.changeState(erp, uidapiaccess, passapiaccess, "account.payment", "post", idPayment);
           wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", idSale);
-          long end = System.currentTimeMillis();
-          
-          System.out.println("TEMPS PROCESS SALE : " + (end-start));
+          this.ca += ex.getQuantity() * ex.getPrice();
+          //long end = System.currentTimeMillis();
+          System.out.println("Vente entre " + ex.getVendor().getOwner().getName() + " et " + ex.getBuyer().getOwner().getName()
+                + " pour " + ex.getQuantity() + " unité(s) de " + ex.getProduct().getName() + " à " + ex.getPrice() + " CHF");
+          //System.out.println("TEMPS PROCESS SALE : " + (end-start));
+    }
+
+    @Override
+    public int compareTo(Company o) {
+        if(this.ca < o.ca)
+            return 1;
+        else if (this.ca == o.ca)
+            return 0;
+        else
+            return -1;
     }
 
 }
