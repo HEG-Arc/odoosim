@@ -177,6 +177,7 @@ public class Odoosim {
         Integer ranking = 1;
         for (Company c : companies) {
             System.out.println(ranking + ") Equipe " + c.getName() + " avec un chiffre d'affaires de " + c.getCa() + " CHF");
+            ranking++;
         }
     }
 
@@ -217,17 +218,19 @@ public class Odoosim {
                 //  Récupération du nombre de revendeur du même type
                 Integer volumMarket = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + retailer.getLocalisation().getName()
                         + "']/retailers/retailer[@type='" + retailer.getType() + "']/@number").get(0));
-                //  Calculation de la quantité désirée pour le produit en cours
-                Double quantityNeeded = (double) Math.round(volumPerDayPerProduct / 100 * retailer.getLocalisation().getMarketPart()
-                        / volumMarket / 100 * retailer.getMarketPart() / preferences);
-                //  Si la quantité est plus grande que 1.0 alors on crée une demande
-                if (quantityNeeded > 1.0) {
-                    Demand demand = new Demand(neededProduct, day, quantityNeeded);
-                    retailer.addDemand(demand);
-                    neededProduct.addDemand(demand);
-                    if (activPKI) {
-                        PKI_quantity_demands++;
-                        PKI_volum_demands += quantityNeeded;
+                for(int i=0;i<volumMarket;i++) {
+                    //  Calculation de la quantité désirée pour le produit en cours
+                    Double quantityNeeded = (double) Math.round(volumPerDayPerProduct / 100 * retailer.getLocalisation().getMarketPart()
+                            / volumMarket / 100 * retailer.getMarketPart() / preferences);
+                    //  Si la quantité est plus grande que 1.0 alors on crée une demande
+                    if (quantityNeeded >= 1.0) {
+                        Demand demand = new Demand(neededProduct, day, quantityNeeded);
+                        retailer.addDemand(demand);
+                        neededProduct.addDemand(demand);
+                        if (activPKI) {
+                            PKI_quantity_demands++;
+                            PKI_volum_demands += quantityNeeded;
+                        }
                     }
                 }
             }
@@ -248,8 +251,8 @@ public class Odoosim {
             //  Odoo.com a retournée quelque chose
             if (tuple instanceof HashMap) {
                 HashMap product = (HashMap) tuple;
-                //  S'il y a du stock alors on crée une offre
-                if (!((Double) product.get("qty_available") < 1)) {
+                //  S'il y a du stock et que le prix ne dépasse pas la limite alors on crée une offre
+                if (!((Double) product.get("qty_available") < 1) && (Double) product.get("list_price")<=good.getCustomerMaxPrice()) {
                     Offer o = new Offer(good, company);
                     o.setOwner(company);
                     o.setProduct(good);
@@ -284,7 +287,8 @@ public class Odoosim {
                     getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@default_code").get(0),
                     getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/name").get(0),
                     Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@standard_price").get(0)),
-                    Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@bestPrice").get(0)));
+                    Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@bestPrice").get(0)),
+                    Double.parseDouble(getDataXML(scenario, "//product_sellable[" + (i + 1) + "]/@maxPrice").get(0)));
             products.add(g);
         }
     }
@@ -386,11 +390,12 @@ public class Odoosim {
             int payMax = Integer.parseInt(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@payMax").get(0));
             Double part = Double.parseDouble(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@part").get(0));
             Double elasticity = Double.parseDouble(getDataXML(scenario, "//markets/market[name='" + a.getName() + "']/retailers/retailer[" + (i + 1) + "]/@elasticity").get(0));
-            for (int ii = 0; ii < volum; ii++) {
-                Retailer r = new Retailer("[" + a.getName() + "] " + name + (ii + 1), part, elasticity, payMin, payMax, type);
+            //for (int ii = 0; ii < volum; ii++) {
+                //Retailer r = new Retailer("[" + a.getName() + "] " + name + (ii + 1), part, elasticity, payMin, payMax, type);
+                Retailer r = new Retailer("[" + a.getName() + "] " + name, part, elasticity, payMin, payMax, type);
                 a.addConsumer(r);
                 generatePreferences(r);
-            }
+            //}
         }
     }
 

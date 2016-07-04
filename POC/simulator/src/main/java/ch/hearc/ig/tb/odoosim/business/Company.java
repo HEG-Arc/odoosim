@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.*;
 import static java.util.Arrays.asList;
 
-public class Company  implements Comparable<Company> {
+public class Company implements Comparable<Company> {
 
     private int id;
     private String code;
@@ -185,6 +185,21 @@ public class Company  implements Comparable<Company> {
     public <T> void stockEntry(Odoo wsapi, String date, Double quantity, List<T> products) {
         List<Product> allProducts = (List<Product>) products;
         for (Product product : allProducts) {
+            try {
+                HashMap d = new HashMap<>();
+                d.put("location_id", idStock);
+                d.put("lot_id", false);
+                d.put("new_quantity", quantity);
+                d.put("product_tmpl_id", product.getId());
+                d.put("product_id", product.getId());
+                d.put("product_variant_count", 1);
+                //int id = wsapi.insert(database, "stock.change.product.qty", d, uidaccess, password);
+                wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.change.product.qty", "change_product_qty", wsapi.insert(erp, "stock.change.product.qty", d, uidapiaccess, passapiaccess));
+            } catch (Exception e) {
+                System.out.println("Une erreur est survenue dans l'entrée de stock automatique");
+            }
+
+            /*
             HashMap data = new HashMap();
             data.put("in_date", date + " 00:00:00");
             data.put("product_id", product.getId());
@@ -195,7 +210,7 @@ public class Company  implements Comparable<Company> {
                 wsapi.insert(erp, "stock.quant", data, uidapiaccess, passapiaccess);
             } catch (Exception e) {
                 System.out.println("Une erreur est survenue dans l'entrée de stock automatique");
-            }
+            }*/
         }
     }
 
@@ -308,7 +323,7 @@ public class Company  implements Comparable<Company> {
         });
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", ex.getId());
     }
-    
+
     public void processQuickSale(Odoo wsapi, Exchange ex) throws Exception {
         HashMap data = new HashMap<>();
         data.put("date_order", ex.getDate() + " 00:00:00");
@@ -322,17 +337,17 @@ public class Company  implements Comparable<Company> {
             }
         })));
         ex.setId(wsapi.insert(erp, "sale.order", data, uidapiaccess, passapiaccess));
-        
+
         data.clear();
         data = (HashMap) wsapi.getTuple(erp, uidapiaccess, passapiaccess, "sale.order", asList(asList("id", "=", ex.getId())),
                 new HashMap() {
             {
-                put("fields", asList("name","amount_total"));
+                put("fields", asList("name", "amount_total"));
             }
         });
         ex.setName((String) data.get("name"));
         Double amount = (Double) data.get("amount_total");
-        
+
         data.clear();
         data.put("product_id", ex.getProduct().getId());
         data.put("product_tmpl_id", ex.getProduct().getId());
@@ -340,7 +355,7 @@ public class Company  implements Comparable<Company> {
         data.put("location_id", idStock);
         data.put("product_variant_count", 1);
         wsapi.insert(erp, "stock.change.product.qty", data, uidapiaccess, passapiaccess);
-      
+
         data.clear();
         //  Fonctionne bien! Essayer de reproduire les deux entreés dans le journal avec le compte 1100 débiteur comme sur les feuilles papier
         //  Ne pas oublier de post le paiement ! 
@@ -374,7 +389,7 @@ public class Company  implements Comparable<Company> {
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", ex.getId());
         //  La partie ci-dessus la faire à ce moment là et avant faire la transaction avec le compte 3200 vente marchandise avec 1100 débiteur
     }
-    
+
     public void processQuickSale2(Odoo wsapi, Exchange ex) throws Exception {
         //long start = System.currentTimeMillis();
         //  Création de la vente
@@ -382,7 +397,7 @@ public class Company  implements Comparable<Company> {
         d.put("state", "sale");
         d.put("date_order", ex.getDate() + " 00:00:00");
         d.put("partner_id", ex.getBuyer().getOwner().getId());
-        d.put("picking_policy","direct");
+        d.put("picking_policy", "direct");
         d.put("order_line", asList(asList(0, false, new HashMap<String, Object>() {
             {
                 put("product_id", ex.getProduct().getId());
@@ -391,7 +406,7 @@ public class Company  implements Comparable<Company> {
                 put("tax_id", asList(asList(6, false, asList(14))));
             }
         })));
-        int idSale = wsapi.insert(erp,"sale.order",d,uidapiaccess,passapiaccess);
+        int idSale = wsapi.insert(erp, "sale.order", d, uidapiaccess, passapiaccess);
         //pas besoin wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_confirm", idSale);
         HashMap changeState = wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_view_delivery", idSale);
         wsapi.changeState(erp, uidapiaccess, passapiaccess, "stock.picking", "do_new_transfer", (int) changeState.get("res_id"));
@@ -402,7 +417,7 @@ public class Company  implements Comparable<Company> {
         d.put("amount", 0);
         d.put("deposit_account_id", false);
         d.put("product_id", false);
-        int insert = wsapi.insert(erp,"sale.advance.payment.inv",d,uidapiaccess,passapiaccess);
+        int insert = wsapi.insert(erp, "sale.advance.payment.inv", d, uidapiaccess, passapiaccess);
         d.clear();
         d.put("active_id", idSale);
         d.put("active_ids", asList(idSale));
@@ -413,41 +428,42 @@ public class Company  implements Comparable<Company> {
         int idInvoice = (int) invoices.get("res_id");
         //wsapi.getTuple(erp, uidapiaccess, passapiaccess, "account.invoice", asList(asList("id", "=", ex.getId())), d)
         wsapi.workflowProgress(erp, uidapiaccess, passapiaccess, "account.invoice", "invoice_open", idInvoice);
-          //System.out.println("Avant le paiement");
-          d.clear();
-          d.put("amount", (ex.getQuantity()*ex.getPrice())); //faire qty * prix !
-          d.put("communication", "Effectué par le simulateur ODOOSIM");
-          d.put("journal_id", idJournalSaleProduct); // Bank
-          d.put("partner_id", ex.getBuyer().getOwner().getId()); //celui du client !
-          d.put("partner_type","customer");
-          d.put("payment_date", ex.getDate() + " 00:00:00");
-          d.put("payment_difference_handling","open");
-          d.put("payment_method_id",1);
-          d.put("payment_type","inbound");
-          d.put("writeoff_account_id",false);
-          d.put("invoice_ids", asList(asList(4, idInvoice, false)));
-          int idPayment = wsapi.insert(erp,"account.payment",d,uidapiaccess,passapiaccess);
-          d.clear();
-          d.put("active_id", idInvoice);
-          d.put("active_ids", asList(idInvoice));
-            d.put("active_model", "account.invoice");
-          wsapi.changeState(erp, uidapiaccess, passapiaccess, "account.payment", "post", idPayment);
-          wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", idSale);
-          this.ca += ex.getQuantity() * ex.getPrice();
-          //long end = System.currentTimeMillis();
-          System.out.println("Vente entre " + ex.getVendor().getOwner().getName() + " et " + ex.getBuyer().getOwner().getName()
+        //System.out.println("Avant le paiement");
+        d.clear();
+        d.put("amount", (ex.getQuantity() * ex.getPrice())); //faire qty * prix !
+        d.put("communication", "Effectué par le simulateur ODOOSIM");
+        d.put("journal_id", idJournalSaleProduct); // Bank
+        d.put("partner_id", ex.getBuyer().getOwner().getId()); //celui du client !
+        d.put("partner_type", "customer");
+        d.put("payment_date", ex.getDate() + " 00:00:00");
+        d.put("payment_difference_handling", "open");
+        d.put("payment_method_id", 1);
+        d.put("payment_type", "inbound");
+        d.put("writeoff_account_id", false);
+        d.put("invoice_ids", asList(asList(4, idInvoice, false)));
+        int idPayment = wsapi.insert(erp, "account.payment", d, uidapiaccess, passapiaccess);
+        d.clear();
+        d.put("active_id", idInvoice);
+        d.put("active_ids", asList(idInvoice));
+        d.put("active_model", "account.invoice");
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "account.payment", "post", idPayment);
+        wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_done", idSale);
+        this.ca += ex.getQuantity() * ex.getPrice();
+        //long end = System.currentTimeMillis();
+        System.out.println("Vente entre " + ex.getVendor().getOwner().getName() + " et " + ex.getBuyer().getOwner().getName()
                 + " pour " + ex.getQuantity() + " unité(s) de " + ex.getProduct().getName() + " à " + ex.getPrice() + " CHF");
-          //System.out.println("TEMPS PROCESS SALE : " + (end-start));
+        //System.out.println("TEMPS PROCESS SALE : " + (end-start));
     }
 
     @Override
     public int compareTo(Company o) {
-        if(this.ca < o.ca)
+        if (this.ca < o.ca) {
             return 1;
-        else if (this.ca == o.ca)
+        } else if (this.ca == o.ca) {
             return 0;
-        else
+        } else {
             return -1;
+        }
     }
 
 }

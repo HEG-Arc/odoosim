@@ -15,6 +15,7 @@ public class Apps {
     public static void run() throws Exception {
         
         Odoosim odoosimulator = new Odoosim();
+        writeLn(typeOfMessage.INFO, "Bienvenue sur OdooSIM\n\rSuivez les instructions! (pour quitter le programme appuyer sur 'Q')");
         
         try {
             writeLn(typeOfMessage.INFO, "'Y' pour lancer la phase de configuration 1 sur 3");
@@ -45,6 +46,8 @@ public class Apps {
     }
     
     public static Boolean action(String choice) {
+        if("Q".equals(choice))
+            System.exit(0);
         return "Y".equals(choice);
     }
     

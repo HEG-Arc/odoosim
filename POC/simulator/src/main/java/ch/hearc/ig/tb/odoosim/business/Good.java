@@ -15,19 +15,21 @@ public class Good extends Product {
     private Collection<Demand> demands;
     private Double indicativeSalePrice;
     private Double customerBestPrice;
+    private Double customerMaxPrice;
     private Map<Integer, Double> billOfMaterials;
     
     public Good(String name) {
         super(name);
     }
 
-    public Good(Double indicativeSalePrice, String code, String name, Double purchasePrice, Double customerBestPrice) {
+    public Good(Double indicativeSalePrice, String code, String name, Double purchasePrice, Double customerBestPrice, Double customerMaxPrice) {
         super(code, name, purchasePrice);
         this.vendors = new ArrayList<>();
         this.indicativeSalePrice = indicativeSalePrice;
         this.billOfMaterials = new HashMap();
         this.demands = new ArrayList<>();
         this.customerBestPrice = customerBestPrice;
+        this.customerMaxPrice = customerMaxPrice;
     }
     
     public Collection<Demand> getDemands() {
@@ -69,6 +71,14 @@ public class Good extends Product {
     public void setCustomerBestPrice(Double customerBestPrice) {
         this.customerBestPrice = customerBestPrice;
     }
+
+    public Double getCustomerMaxPrice() {
+        return customerMaxPrice;
+    }
+
+    public void setCustomerMaxPrice(Double customerMaxPrice) {
+        this.customerMaxPrice = customerMaxPrice;
+    }
     
     public void addBOM(int idProduct, Double quantity) {
         this.billOfMaterials.put(idProduct, quantity);
@@ -88,6 +98,9 @@ public class Good extends Product {
             Collections.shuffle((List<?>) vendors);
             Collections.sort((List<Offer>) vendors);
             int numberOffers = vendors.size();
+            Double offerAvailable = getMarketAvailability();
+            if(offerAvailable<1)
+                break;
             //  Avec cette ligne, il faudrait faire que la méthode getMarketAvailability puisse définir le prix maximum auquel le client est d'accord
             //  d'acheter... Mais cela ne fonctionne pas encore !
             
@@ -106,13 +119,13 @@ public class Good extends Product {
                                 Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand, 
                                         offer, this, date);
                                 //demand.getOwner().addExchange(ex);
-                                demand.setQuantity(demand.getQuantity() - offer.getQuantity());
-                                offer.setQuantity(offer.getQuantity() - offer.getQuantity());
+                                demand.setQuantity(demand.getQuantity() - ex.getQuantity());
+                                offer.setQuantity(offer.getQuantity() - ex.getQuantity());
                                 //offer.getOwner().processSale(wsapi, ex);   
                                 offer.getOwner().processQuickSale2(wsapi, ex);  
                             } else if (qty <= offer.getQuantity()) {
                                 
-                                Exchange ex = new Exchange(offer.getQuantity(), offer.getPrice(), demand, 
+                                Exchange ex = new Exchange(qty, offer.getPrice(), demand, 
                                         offer, this, date);
                                 //demand.getOwner().addExchange(ex);
                                 //  Je met à 0.0 car vu que l'offre est triée sur le prix, cela n'aurait pas de sens
@@ -138,7 +151,7 @@ public class Good extends Product {
                 if(--numberOffers<1)
                     break;
             }
-            break;
+            //break;
         }
     }
     
