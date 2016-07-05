@@ -15,27 +15,7 @@
     </odoo>
     <companies>
         <company name="TEAM A">
-            <erp database="edu-breweryandcoa"/>
-            <players>
-                <player login="anthony.tomat881215@mailinator.com">
-                    <name>A. Tomat</name>
-                    <roles>
-                        <role>
-                            <name>Sales</name>
-                            <value>Manager</value>
-                        </role>
-                    </roles>
-                </player>
-            </players>
-            <bank>
-                <name>VUBS SA</name>
-            </bank>
-            <shareholder>
-                <name>Breweries Holding Corp.</name>
-            </shareholder>
-        </company>
-        <company name="TEAM B">
-            <erp database="edu-breweryandcob"/>
+            <erp database="edu-breweryaca"/>
             <players>
                 <player login="anthony.tomat881215@mailinator.com">
                     <name>A. Tomat</name>
@@ -370,7 +350,7 @@
                     </retailer>
                 </retailers>       
             </market>
-            <market part="20.00" elasticity="9.5" demandPartByCustomers="10">
+            <market part="20.00">
                 <name>Suisse centrale</name>
                 <retailers>
                     <retailer type="groceries" number="12" payMin="5" payMax="10" part="20.00" elasticity="-2.45">
@@ -414,7 +394,7 @@
                     </retailer>
                 </retailers>
             </market>
-            <market part="50.00" elasticity="6.9" demandPartByCustomers="9">
+            <market part="50.00">
                 <name>Suisse Ouest</name>
                 <retailers>
                     <retailer type="groceries" number="23" payMin="5" payMax="10" part="20.00" elasticity="-2.20">

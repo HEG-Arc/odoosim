@@ -426,6 +426,10 @@ public class Company implements Comparable<Company> {
         wsapi.update2(erp, uidapiaccess, passapiaccess, "sale.advance.payment.inv", "create_invoices", insert, d);
         HashMap invoices = wsapi.changeState(erp, uidapiaccess, passapiaccess, "sale.order", "action_view_invoice", idSale);
         int idInvoice = (int) invoices.get("res_id");
+        d.clear();
+        d.put("date", ex.getDate());
+        d.put("date_invoice", ex.getDate());
+        wsapi.update(erp, "account.invoice", uidapiaccess, passapiaccess, idInvoice, d);
         //wsapi.getTuple(erp, uidapiaccess, passapiaccess, "account.invoice", asList(asList("id", "=", ex.getId())), d)
         wsapi.workflowProgress(erp, uidapiaccess, passapiaccess, "account.invoice", "invoice_open", idInvoice);
         //System.out.println("Avant le paiement");
